@@ -1,6 +1,7 @@
 // core
 import React from "react";
 import axios from "axios";
+import {styles} from 'react';
 import { useEffect, useState, useRef } from "react";
 import ReactPlayer from 'react-player/youtube';
 
@@ -131,6 +132,7 @@ function App(){
         onPressEnter={linkProcess}
         onSearch={linkProcess}
       />
+      {/* <div className="tx">test</div> */}
       <video
         ref={player}
         src={link}
@@ -142,5 +144,4 @@ function App(){
     </AppLayout>
   );
 }
-
 export default App;

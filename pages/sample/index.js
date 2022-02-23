@@ -1,11 +1,13 @@
 import React from "react";
 
-import AppLayout from "../components/AppLayout";
+import AppLayout from "../../components/AppLayout";
+
+import './style.less';
 
 const backup = props => {
   return (
     <AppLayout>
-      <div>Backup Page</div>
+      <div className="text">Sample Page</div>
     </AppLayout>
   );
 };
