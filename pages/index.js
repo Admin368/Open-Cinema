@@ -4,6 +4,7 @@ import axios from "axios";
 import {styles} from 'react';
 import { useEffect, useState, useRef } from "react";
 import ReactPlayer from 'react-player/youtube';
+import {useRouter} from 'next/router';
 
 import { message, Space } from 'antd';
 
@@ -29,6 +30,9 @@ function App(){
   const [isSearching, setIsSearching] = useState(false);
   const [title, setTitle] = useState('ZX LINK');
   const [link, setLink] = useState('');
+  const [roomId, setRoomId] = useState(0);
+  const [isDebugging, setIsDebugging] = useState(true);
+  const router = useRouter();
 
   async function linkProcess(){
     if(searchValue!=''){
@@ -69,8 +73,28 @@ function App(){
   function seek(target){
     
   }
-
+  const DebuggerDiv=()=>{
+    return (
+        <div style={{
+          position:'fixed',
+          zIndex:1000,
+          border: '1px solid grey',
+          padding:'10px',
+        }}>
+            {/* <span>roomId: {roomId}</span><br/>
+            <span>Path:- {router.path}</span><br/>
+            <span>asPath:- {router.asPath}</span><br/> */}
+        </div>
+    )
+  }
   useEffect(()=>{
+    //GET ROOOM
+    const {room} = router.query;
+    console.log('room:'+room);
+    router.push({
+      pathname: '/',
+      search: '?room=0'
+    });
     //ON READY
     player.current.addEventListener('loadedmetadata', (event) => {
       message.success('Video Found');
@@ -116,6 +140,8 @@ function App(){
   },[])
   return(
     <AppLayout>
+      {isDebugging==true?<DebuggerDiv></DebuggerDiv>:null}
+      {/* <DebuggerDiv></DebuggerDiv> */}
       <div>Welcome</div>
       <Title>Watch ZX Together</Title>
       <Search 
@@ -144,4 +170,6 @@ function App(){
     </AppLayout>
   );
 }
+
+
 export default App;
