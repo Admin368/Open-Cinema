@@ -31,13 +31,7 @@ const url = url2;
 import './style.less';
 //SOCKET
 import io from 'Socket.IO-client';
-const socket = io('http://localhost:3000');
-// setInterval(() => {
-//   socket.emit('client', 'Halla from Client');
-// }, 3000);
-// const socket_client = require("socket.io/client-dist/socket.io");
-// import socket_client from "socket.io";
-// const socket = socket_client.io('http://192.168.1.168:3000');
+// const socket = io('http://localhost:3000');
 
 const userData_Default={
 
@@ -50,7 +44,7 @@ function App(){
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [title, setTitle] = useState('ZX LINK');
-  const [mediaUrl, setMediaLink] = useState('');
+  const [mediaUrl, setMediaUrl] = useState(url3);
   const [roomId, setRoomId] = useState(0);
   const [isDebugging, setIsDebugging] = useState(true);
   const router = useRouter();
@@ -68,7 +62,7 @@ function App(){
             //console.log(res.data)
             if(res.data.videoUrl!=null){
                 message.success('Successfully Got Link');
-                await setMediaLink(res.data.videoUrl);
+                await setMediaUrl(res.data.videoUrl);
                 player_play();
             }else{
               message.error('Failed to get Link, check Link Correctly');
@@ -86,15 +80,6 @@ function App(){
     }
   }
 
-  function player_play(){
-    player.current.play();
-  }
-  function player_pause(){
-    player.current.pause();
-  }
-  function player_seek(target){
-    
-  }
   const DebuggerDiv=()=>{
     return (
         <div style={{
@@ -103,9 +88,9 @@ function App(){
           border: '1px solid grey',
           padding:'10px',
         }}>
-            {/* <span>roomId: {roomId}</span><br/>
+            <span>roomId: {roomId}</span><br/>
             <span>Path:- {router.path}</span><br/>
-            <span>asPath:- {router.asPath}</span><br/> */}
+            <span>asPath:- {router.asPath}</span><br/>
         </div>
     )
   }
@@ -131,115 +116,22 @@ function App(){
   useEffect(()=>{
     //GET ROOOM
     const {room} = router.query;
-    setMediaLink(url1);
-    //console.log('room:'+room);
+    // setMediaUrl(url3);
     router.push({
       pathname: '/',
       search: '?room=0'
-    });
-
-    // //ON TIME UPDATE
-    // player.current.addEventListener('timeupdate', (event) => {
-    //     // console.log(player);
-    // });
-
-    // //ON READY
-    // player.current.addEventListener('loadedmetadata', (event) => {
-    //   const msg = 'Video Found';
-    //   const parcel = {
-    //     topic:'event_player',
-    //     action:'ready',
-    //     msg: msg,
-    //   }
-    //   message.success(msg);
-    //   socket_sendRoomData(parcel);
-    // });
-    //ON PLAY
-    // player.current.addEventListener('play', (event) => {
-    //   event.preventDefault();
-    //   player_seek(event.target);
-    //   const currentTime =  event.target.currentTime;
-    //   //console.log('playing from '+currentTime);
-
-    //   const msg = 'Player Playing';
-    //   const time = currentTime;
-    //   const parcel = {
-    //     topic:'event_player',
-    //     action:'play',
-    //     msg,
-    //     time,
-    //   }
-    //   message.success(msg);
-    //   socket_sendRoomData(parcel);
-    // }, false);
-    //ON PAUSE
-    // player.current.addEventListener('pause', (event) => {
-    //   event.preventDefault();
-    //   player_seek(event.target);
-    //   const currentTime =  event.target.currentTime;
-    //   console.log('paused at '+currentTime);
-
-    //   const msg = 'Player Paused';
-    //   const parcel = {
-    //     topic:'event_player',
-    //     action:'pause',
-    //     msg: msg,
-    //   }
-    //   message.success(msg);
-    //   socket_sendRoomData(parcel);
-    // }, false);
-    
-    // //ON SEEKED
-    // player.current.addEventListener('seeked', (event) => {
-    //   const currentTime =  event.target.currentTime;
-    //   //console.log('seeked to '+currentTime);
-    // });
-
-    // //ON SEEKING
-    // player.current.addEventListener('seeking', (event) => {
-    //   // const currentTime =  event.target.currentTime;
-    //   // console.log('seeking to '+currentTime);
-    // });
-
-    // //ON SEEKED
-    // player.current.addEventListener('seeked', (event) => {
-    //   const currentTime =  event.target.currentTime;
-    //   //console.log('seeked to '+currentTime);
-    // });
-
-    // //ON BUFFER
-    // player.current.addEventListener('seeking', (event) => {
-    //   const currentTime =  event.target.currentTime;
-    //   //console.log('seeked to '+currentTime);
-    // });
-
-    // //ON ERROR
-    // player.current.addEventListener('error', (event) => {
-    //   message.error('Error Bad/No Link');
-
-    // });
-    
+    });  
   },[])
-  socket.on('room_'+roomId,(msg)=>{
-    //console.log(`ROOM[${room}]`);
-    // console.log(msg);
-  });
+  // socket.on('room_'+roomId,(msg)=>{
+  //   //console.log(`ROOM[${room}]`);
+  //   // console.log(msg);
+  // });
   return(
     <AppLayout>
-      {isDebugging==true?<DebuggerDiv></DebuggerDiv>:null}
+      {/* {isDebugging==true?<DebuggerDiv></DebuggerDiv>:null} */}
       {/* <DebuggerDiv></DebuggerDiv> */}
-      <div>Welcome</div>
-      <Title>Watch ZX Together</Title>
-      <Button 
-        type="primary"
-        icon={<DownloadOutlined />}
-        size='large' 
-        onClick={()=>{
-          //console.log('clicked');
-          player_play();
-          player.current.webkitEnterFullScreen();
-        }}
-      />
+      {/* <div>Welcome</div>
+      <Title>Watch ZX Together</Title> */}
       <Search 
         ref={search}
         placeholder="Enter A zxzj Link here Below"
@@ -253,16 +145,12 @@ function App(){
         loading={isSearching} 
         onPressEnter={linkProcess}
         onSearch={linkProcess}
+        stye={{
+          // position:'fixed',
+          // bottom:0,
+        }}
       />
-      {/* <div className="tx">test</div> */}
-      <video
-        ref={player}
-        src={mediaUrl}
-        height='400px'
-        width='640'
-        id="player"
-        // controls
-      />  
+      <Player mediaUrl={mediaUrl}/>
       <Divider />
     </AppLayout>
   );
