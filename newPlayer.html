@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="video-container" id="video-container">
+        <video 
+            id="video"
+        >
+            <source 
+                src="http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaaeca.f0.mp4?dis_k=b8bb5e864066b469fc2af0aed9ac81fa&dis_t=1644942290.mp4"
+                type="video/mp4"></source>
+        </video>
+        <button id="controls_fullScreen">Full Screen</button>
+    </div>
+</body>
+<style>
+    #video{
+        width: 100%;
+    }
+    #controls_fullScreen{
+        position: absolute;
+        top:0px;
+        left:0px;
+    }
+    .video-container {
+        width: 800px;
+        border-radius: 4px;
+        margin: 0 auto;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+</style>
+<script>
+    // const video = document.getElementById('video');
+    const video = document.getElementById('video');
+    const videoContainer = document.getElementById('video-container');
+
+
+    const controls_fullScreen = document.getElementById('controls_fullScreen');
+    var isFullScreen = false;
+    const videoWorks = !!document.createElement('video').canPlayType;
+    if (videoWorks) {
+        video.controls = false;
+        // videoControls.classList.remove('hidden');
+    }
+    //DEBUGGER
+    function debug(msg){
+        console.log(`${debug.caller.name}()=>${msg}`);
+    }
+//FULLSCREEN-START////////////////////////////////////////////////////////////
+    //FULLSCREEN-BUTTON
+    controls_fullScreen.addEventListener('click',()=>{
+        fullScreen_action_toggle();
+    });
+    //FULLSCRREEN-EVENT
+    document.addEventListener("fullscreenchange", function () {
+        fullscreen_handle(document.fullscreen);
+    }, false);
+    document.addEventListener("mozfullscreenchange", function () {
+        fullscreen_handle(document.mozFullScreen);
+    }, false);
+    document.addEventListener("webkitfullscreenchange", function () {
+        fullscreen_handle(document.webkitIsFullScreen);
+    }, false);
+    //FULLSCREEN-EVENT - HANDLE
+    function fullscreen_handle(fullscreenState){
+        debug(`FullScreenState: ${fullscreenState}`);
+        video.controls = false;
+        switch(fullscreenState){
+            case true:
+                isFullScreen=true;
+                break;
+            case false:
+                isFullScreen=false;
+                break;
+            default:
+                debug('No fullScreen Event');
+                break
+        }
+    }
+    //FULLSCREEN-ACTION-ON
+    function fullScreen_action_request(){
+        try{
+            // document.requestFullscreen()
+            if (videoContainer.webkitRequestFullscreen) {
+                // Need this to support Safari
+                videoContainer.webkitRequestFullscreen();
+            } else {
+                videoContainer.requestFullscreen();
+            }
+        }catch{
+            debug('FAILED TO REQUEST FULLSCREEN');
+        }
+    }
+    //FULLSCREEN-ACTION-OFF
+    function fullScreen_action_exit(){
+        try{
+            document.exitFullscreen();
+        }catch{
+            debug('FAILED TO EXIT FULLSCREEN');
+        }
+    }
+    //FULLSCREEN-ACTION-TOGGLE
+    function fullScreen_action_toggle(){
+        if (document.fullscreenElement) {
+            fullScreen_action_exit();
+        } else {
+            fullScreen_action_request();
+        }
+    }
+//FULLSCREEN-END////////////////////////////////////////////////////////////
+
+
+</script>
+</html>
