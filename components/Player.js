@@ -6,7 +6,12 @@ const url1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaa
 const url2 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 
 import './Player.less';
-import { message } from "antd";
+import { 
+    message,
+    Slider,
+    Spin,
+    Progress,
+} from "antd";
 // import { useState } from "react/cjs/react.production.min";
 // import fullscreen from "video-react/lib/utils/fullscreen";
 //DEBUGGER
@@ -54,7 +59,12 @@ const Player=(props)=> {
     const [videoIsMediaLoading, setVideoIsMediaLoading] = useState(false);
     const [videoIsSeeking, setVideoIsSeeking] = useState(false);
     const [videoIsStalled, setVideoIsStalled] = useState(false);
-    // const [videoIsSuspend, setVideoIsSuspend] = useState(false);
+    const [videoIsBuffering, setVideoIsBuffering] = useState(true);
+
+    const [controlsSeekValue, setControlsSeekValue] = useState(0);
+    const [controlsSeekisVisible, setControlsSeekisVisible] = useState(false);
+    // const [controlsSeekisChanging, setControlsSeekIsChanging] = useState(false);
+    const [controlsSeekIsChanging, setControlsSeekIsChanging] = useState(false);
 
     const [userIsAdmin, setUserIsAdmin] = useState(true);
     const video = useRef();
@@ -62,9 +72,11 @@ const Player=(props)=> {
     const controls_prev = useRef();
     const controls_play = useRef();
     const controls_next = useRef();
+    const controls_mute = useRef();
     const controls_volume = useRef();
     const controls_time = useRef();
     const controls_seek = useRef();
+    const controls_seeker = useRef();
     const controls_chat = useRef();
     const controls_fullScreen = useRef();
 
@@ -98,6 +110,7 @@ function player_event_handle_canplay(){
     debug(message);
     try{
         setVideoIsCanPlay(true);
+        setVideoIsBuffering(false);
     }catch{
         debug(`FAILURE:${message}`);
     }
@@ -109,6 +122,7 @@ function player_event_handle_canplaythrough(){
     debug(message);
     try{
         setVideoIsCanPlayThrough(true);
+        setVideoIsBuffering(false);
     }catch{
         debug(`FAILURE:${message}`);
     }
@@ -156,6 +170,7 @@ function player_event_handle_error(){
     debug(message);
     try{
         setVideoIsError(true);
+        setVideoIsBuffering(false);
         debug(`FAILURE:${message}`);
     }catch{
         debug(`FAILURE:${message}`);
@@ -223,6 +238,7 @@ function player_event_handle_playing(){
     const message =`player-event-handle-playing`;
     debug(message);
     try{
+        setVideoIsBuffering(false);
         bebug('RESUME FROM BUFFERING');
     }catch{
         debug(`FAILURE:${message}`);
@@ -267,8 +283,8 @@ function player_event_handle_seeked(){
 //PLAYER_EVENT_HANDLE_seeking///////////////////////////////////////////////////////////
 //Fires when the user starts moving/skipping to a new position in the audio/video
 function player_event_handle_seeking(){
-    debug(message);
     const message =`player-event-handle-seeking`;
+    debug(message);
     try{
         setVideoIsSeeking(true);
     }catch{
@@ -282,6 +298,7 @@ function player_event_handle_stalled(){
     debug(message);
     try{
         setVideoIsStalled(true);
+        setVideoIsBuffering(false);
         debug(`FAILURE:${message}`);
     }catch{
         debug(`FAILURE:${message}`);
@@ -301,11 +318,16 @@ function player_event_handle_suspend(){
 }
 //PLAYER_EVENT_HANDLE_timeupdate///////////////////////////////////////////////////////////
 //Fires when the current playback position has changed
-function player_event_handle_timeupdate(){
+const player_event_handle_timeupdate=(isSeeking)=>{
     const message =`player-event-handle-timeupdate`;
     // debug(message);
     try{
-        setVideoCurrentTime(video.current.currentTime);
+        const currentTime = video.current.currentTime
+        setVideoCurrentTime(currentTime);
+        // if(!isSeeking){
+        //     debug('seek Allowed'+isSeeking);
+        //     setControlsSeekValue(currentTime);
+        // }  
     }catch{
         debug(`FAILURE:${message}`);
     }
@@ -328,7 +350,7 @@ function player_event_handle_waiting(){
     debug(message);
     // debug(`player-event-handle-waiting`);
     try{
-        
+        setVideoIsBuffering(true);
     }catch{
         debug(`FAILURE:${message}`);
     }
@@ -488,9 +510,15 @@ controls_next.current.addEventListener('click',()=>{
 });
 
 //CONTROLS_VOLUME ////////////////////////////////////////////////////////////
+controls_mute.current.addEventListener('click',()=>{
+    debug('CONTROLS_MUTE - EVENT - CLICK');
+    video_action_volume_mute_toggle();
+});
+
+//CONTROLS_VOLUME ////////////////////////////////////////////////////////////
 controls_volume.current.addEventListener('click',()=>{
     debug('CONTROLS_VOLUME - EVENT - CLICK');
-    video_action_volume_mute_toggle();
+    // video_action_volume_mute_toggle();
 });
 
 //CONTROLS_TIME ////////////////////////////////////////////////////////////
@@ -499,9 +527,13 @@ controls_time.current.addEventListener('click',()=>{
 });
 
 //CONTROLS_SEEK ////////////////////////////////////////////////////////////
-controls_seek.current.addEventListener('click',()=>{
-    debug('CONTROLS_SEEK - EVENT - CLICK');
-});
+// controls_seek.current.addEventListener('click',()=>{
+//     debug('CONTROLS_SEEK - EVENT - CLICK');
+// });
+//CONTROLS_SEEKER ////////////////////////////////////////////////////////////
+// controls_seeker.current.addEventListener('hover',()=>{
+//     debug('CONTROLS_SEEKER - EVENT - CLICK');
+// });
 
 //CONTROLS_CHAT ////////////////////////////////////////////////////////////
 controls_chat.current.addEventListener('click',()=>{
@@ -514,7 +546,7 @@ controls_fullScreen.current.addEventListener('click',()=>{
     video_action_fullscreen_toggle();
 });
 //VIDEO_CONTAINER ////////////////////////////////////////////////////////////
-video_container.current.addEventListener('click',()=>{
+video.current.addEventListener('click',()=>{
     debug('CONTROLS_FULLSCREEN - EVENT - CLICK');
     video_action_play_toggle();
 });
@@ -541,7 +573,7 @@ video_container.current.addEventListener('click',()=>{
         video.current.addEventListener('seeking',()=>{player_event_handle_seeking();});
         video.current.addEventListener('stalled',()=>{player_event_handle_stalled();});
         video.current.addEventListener('suspend',()=>{player_event_handle_suspend();});
-        video.current.addEventListener('timeupdate',()=>{player_event_handle_timeupdate();});
+        video.current.addEventListener('timeupdate',()=>{player_event_handle_timeupdate(controlsSeekIsChanging);});
         video.current.addEventListener('volumechange',()=>{player_event_handle_volumechange();});
         video.current.addEventListener('waiting',()=>{player_event_handle_waiting();});
     }catch{
@@ -583,30 +615,107 @@ video_container.current.addEventListener('click',()=>{
                 <button ref={controls_prev} style={style_controls_admin}>prev</button>
                 <button ref={controls_play} style={style_controls_admin}>play</button>
                 <button ref={controls_next} style={style_controls_admin}>next</button>
+                <button ref={controls_mute} >mute</button>
                 <button ref={controls_volume} >volume</button>
                 <button ref={controls_time} >{util_convertHMS(videoCurrentTime)}/{util_convertHMS(videoDuration)}</button>
-                <button ref={controls_seek} style={style_controls_admin}>seek</button>
+                <button ref={controls_seek} >seek</button>
+                
+                {/* <Progress 
+                    type="line"
+                    percent={videoCurrentTime/videoDuration*100}
+                    showInfo={false}
+                    // defaultValue={0}
+                    // disabled
+                    // tooltipVisible={false}
+                    // ref={controls_seek}
+                    // value={videoCurrentTime}
+                    // min={0}
+                    // max={videoDuration}
+                    className='controls_seek'
+                /> */}
+                <Slider
+                    defaultValue={0}
+                    value={videoCurrentTime}
+                    min={0}
+                    max={videoDuration}
+                    className='controls_seek_time'
+                    onChange={(value)=>{
+                        
+                    }}
+                    trackStyle={{
+                        // backgroundColor:'transparent',
+                    }}
+                    handleStyle={{
+                        display:'none'
+                    }}
+                    // style={style_controls_admin}
+                />
+                <div 
+                    className='controls_seek_change'
+                    onMouseEnter={()=>{
+                        debug('mouse Hover');
+                        setControlsSeekValue(videoCurrentTime);
+                        setControlsSeekisVisible(true);
+                    }}
+                    onMouseLeave={()=>{
+                        debug('mouse Hover');
+                        setControlsSeekisVisible(false);
+                    }}
+
+                >
+                    <Slider
+                        defaultValue={0}
+                        value={controlsSeekValue}
+                        min={0}
+                        max={videoDuration}
+                        onChange={(value)=>{
+                            setControlsSeekIsChanging(true);
+                            setControlsSeekValue(value);
+                        }}
+                        onAfterChange={(value)=>{
+                            debug('seeking - done');
+                            const newTime=value;
+                            video_action_seek(newTime);
+                            setControlsSeekValue(newTime);
+                            // setControlsSeekIsChanging(false);
+                        }}
+                        trackStyle={{
+                            // backgroundColor:'transparent',
+                        }}
+                        style={{
+                            width:'100%',
+                            visibility:controlsSeekisVisible===true?'visible':'hidden',
+                        }}
+                        tipFormatter={(value)=>{
+                            return util_convertHMS(value);
+                        }}
+                        
+                    />
+                </div>
                 <button ref={controls_chat} style={style_controls_admin}>chat</button>
                 <button ref={controls_fullScreen}>fullsceen</button>
             </div>
-            <video
-                ref={video}
-                className='video'
-                style={{
-                    width:'100%',
-                    background:'grey',
-                }}
-                width={640}
-                // height={video.current.offsetHeight}
-                // src={videoUrl}
-                controls={false}
-                // autoPlay
-                // preload="auto"
-                // muted={videoVolumeIsMuted}
-            >
-                <source src={url1}></source>
-                <source src={url2}></source>
-            </video>
+            <Spin className='video_spinner' spinning={videoIsBuffering} tip='Loading...'>
+                <video
+                    ref={video}
+                    className='video'
+                    style={{
+                        width:'100%',
+                        background:'grey',
+                    }}
+                    width={640}
+                    // height={video.current.offsetHeight}
+                    // src={videoUrl}
+                    controls={false}
+                    // autoPlay
+                    // preload="auto"
+                    muted
+                    // muted={videoVolumeIsMuted}
+                >
+                    <source src={url1}></source>
+                    <source src={url2}></source>
+                </video>
+            </Spin>
         </div>
     )
 }
