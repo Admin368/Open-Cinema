@@ -128,10 +128,6 @@ function App(){
   // });
   return(
     <AppLayout>
-      {/* {isDebugging==true?<DebuggerDiv></DebuggerDiv>:null} */}
-      {/* <DebuggerDiv></DebuggerDiv> */}
-      {/* <div>Welcome</div>
-      <Title>Watch ZX Together</Title> */}
       <Search 
         ref={search}
         placeholder="Enter A zxzj Link here Below"

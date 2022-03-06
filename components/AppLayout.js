@@ -201,9 +201,11 @@ const AppLayout = props => {
         </Header>
         <Content // you may want to change these
           style={{
-            ...contentStyleWidth,
+            // ...contentStyleWidth,
             margin: "24px 16px 0",
-            overflow: "initial"
+            // overflow: "initial",
+            overflow: "initial",
+            border:'1px solid blue',
           }}
         >
           <div

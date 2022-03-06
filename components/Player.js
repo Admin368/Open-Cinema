@@ -22,17 +22,14 @@ const Player=(props)=> {
     function controls_fullScreen_event_handle(){
         console.log('changed');
     }
-    //FULLSCREEN-EVENT - HANDLE
+    //FULLSCREEN-EVENT-HANDLE
     function fullscreen_event_handle(fullscreenState){
         debug(`FullScreenState: ${fullscreenState}`);
-        // video.current.controls = false;
         switch(fullscreenState){
             case true:
-                // isFullScreen=true;
                 setVideoIsFullScreen(true);
                 break;
             case false:
-                // isFullScreen=false;
                 setVideoIsFullScreen(false);
                 break;
             default:
@@ -51,7 +48,7 @@ const Player=(props)=> {
                 video_container.current.requestFullscreen();
             }
         }catch{
-            debug('FAILED TO REQUEST FULLSCREEN');
+            debug('FAILED TO FULLSCREEN REQUEST');
         }
     }
     //FULLSCREEN-ACTION-EXIT
@@ -59,16 +56,20 @@ const Player=(props)=> {
         try{
             document.exitFullscreen();
         }catch{
-            debug('FAILED TO EXIT FULLSCREEN');
+            debug('FAILED TO FULLSCREEN EXIT');
         }
     }
     //FULLSCREEN-ACTION-TOGGLE
     function fullScreen_action_toggle(){
-        if (document.fullscreenElement) {
-            fullScreen_action_exit();
-        } else {
-            fullScreen_action_request();
-        }
+        try{
+            if (document.fullscreenElement) {
+                fullScreen_action_exit();
+            } else {
+                fullScreen_action_request();
+            }
+        }catch{
+            debug('FAILED TO FULLSCREEN TOGGLE');
+        } 
     }
 
     useEffect(()=>{
