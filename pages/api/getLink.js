@@ -8,7 +8,8 @@ const getEpisodeUrl = async() => {
 export default async function handler(req, res) {
     var link = req.query.link;
     
-    if(req.query.link.search("zxzj.fun/video/")==12){
+    // if(req.query.link.search("zxzj.fun/video/")==12){
+    if(req.query.link.search("zxzjtv.com/video/")==12){
         const { Builder } = require('selenium-webdriver');
         const chrome = require('selenium-webdriver/chrome');
         const driver = new Builder()

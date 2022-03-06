@@ -3,42 +3,441 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { render } from "less";
 const url1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaaeca.f0.mp4?dis_k=b8bb5e864066b469fc2af0aed9ac81fa&dis_t=1644942290.mp4';
+const url2 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 
 import './Player.less';
+import { message } from "antd";
+// import { useState } from "react/cjs/react.production.min";
 // import fullscreen from "video-react/lib/utils/fullscreen";
 //DEBUGGER
 function debug(msg){
     // console.log(`${debug.caller.name}()=>${msg}`);
     console.log(`()=>${msg}`);
+    if(msg.search("FAILURE")==12){
+        message.error(msg);
+    } else if(msg.search("SUCCESS")==12){
+        message.success(msg);
+    }
+}
+function util_convertHMS(value) {
+    const sec = parseInt(value, 10); // convert value to number if it's string
+    let hours   = Math.floor(sec / 3600); // get hours
+    let minutes = Math.floor((sec - (hours * 3600)) / 60); // get minutes
+    let seconds = sec - (hours * 3600) - (minutes * 60); //  get seconds
+    // add 0 if value < 10; Example: 2 => 02
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    return hours+':'+minutes+':'+seconds; // Return is HH : MM : SS
 }
 const Player=(props)=> {
     const [videoUrl, setVideoUrl] = useState(); 
+    const [videoPoster, setVideoPoster] = useState('');
+    const [videoVolume, setVideoVolume] = useState(0.5);
+    const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+    const [videoDuration, setVideoDuration] = useState(0);
+
+//ALL IS STATES DONT CONTROL, UPDATED FROM EVENT
+    const [videoVolumeIsMuted, setVideoVolumeIsMuted] = useState(false);
     const [videoIsFullScreen, setVideoIsFullScreen] = useState(false);
+    const [videoIsAbort, setVideoIsAbort] = useState(false);
+    // const [videoIsReady, setVideoIsReady] = useState(false);
+    const [videoIsCanPlay, setVideoIsCanPlay] = useState(false);
+    const [videoIsCanPlayThrough, setVideoIsCanPlayThrough] = useState(false);
+    const [videoIsEmptied, setVideoIsEmptied] = useState(false);
+    const [videoIsEnded, setVideoIsEnded] = useState(false);
+    const [videoIsError, setVideoIsError] = useState(false);
+    const [videoIsLoadedData, setVideoIsLoadedData] = useState(false);
+    const [videoIsLoadedMetaData, setVideoIsLoadedMetaData] = useState(false);
+    const [videoIsLoadStart, setVideoIsLoadStart] = useState(false);
+    const [videoIsPlaying, setVideoIsPlaying] = useState(false);
+    const [videoIsMediaLoading, setVideoIsMediaLoading] = useState(false);
+    const [videoIsSeeking, setVideoIsSeeking] = useState(false);
+    const [videoIsStalled, setVideoIsStalled] = useState(false);
+    // const [videoIsSuspend, setVideoIsSuspend] = useState(false);
+
+    const [userIsAdmin, setUserIsAdmin] = useState(true);
     const video = useRef();
     const video_container = useRef();
+    const controls_prev = useRef();
     const controls_play = useRef();
+    const controls_next = useRef();
+    const controls_volume = useRef();
+    const controls_time = useRef();
+    const controls_seek = useRef();
+    const controls_chat = useRef();
     const controls_fullScreen = useRef();
 
+//CONTROLS_PREV - FUNCTIONS
+    //CONTROLS_PREV - ACTION REQUEST
+    function controls_prev_action_request(){
+
+    }
+
+//CONTROLS_FULLSCREEN - FUNCTIONS
     function controls_fullScreen_event_handle(){
         console.log('changed');
     }
-    //FULLSCREEN-EVENT-HANDLE
-    function fullscreen_event_handle(fullscreenState){
-        debug(`FullScreenState: ${fullscreenState}`);
+//PLAYER_EVENT_HANDLE ////////////////////////////////////////////////////////////
+//PLAYER_EVENT_HANDLE_abort///////////////////////////////////////////////////////////
+//Fires when the loading of an audio/video is aborted
+function player_event_handle_abort(){
+    const message =`player-event-handle-abort`;
+    debug(message);
+    try{
+        setVideoIsAbort(true);
+        debug('FAILURE: VIDEO ABORTED');
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_canplay///////////////////////////////////////////////////////////
+//Fires when the browser can start playing the audio/video
+function player_event_handle_canplay(){
+    const message =`player-event-handle-canplay`;
+    debug(message);
+    try{
+        setVideoIsCanPlay(true);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_canplaythrough//////////////////////////////////////////////////////////
+//Fires when the browser can play through the audio/video without stopping for buffering
+function player_event_handle_canplaythrough(){
+    const message =`player-event-handle-canplaythrough`;
+    debug(message);
+    try{
+        setVideoIsCanPlayThrough(true);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_durationchange///////////////////////////////////////////////////////////
+//Fires when the duration of the audio/video is changed
+function player_event_handle_durationchange(){
+    const message =`player-event-handle-durationchange`;
+    debug(message);
+    try{
+        const duration = video.current.duration
+        setVideoDuration(duration);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_emptied///////////////////////////////////////////////////////////
+//Fires when the current playlist is empty
+function player_event_handle_emptied(){
+    const message =`player_event_handle_emptied`;
+    debug(message);
+    try{
+        setVideoIsEmptied(true);
+        debug('FAILURE: VIDEO EMPTIED');
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_ended///////////////////////////////////////////////////////////
+//Fires when the current playlist is ended
+function player_event_handle_ended(){
+    const message =`player-event-handle-ended`;
+    debug(message);
+    try{
+        setVideoIsEnded(true);
+        message.info('VIDEO IS ENDED');
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}    
+//PLAYER_EVENT_HANDLE_error///////////////////////////////////////////////////////////
+//	Fires when an error occurred during the loading of an audio/video
+function player_event_handle_error(){
+    const message = 'player_event_handle_error';
+    debug(message);
+    try{
+        setVideoIsError(true);
+        debug(`FAILURE:${message}`);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_loadeddata///////////////////////////////////////////////////////////
+//Fires when the browser has loaded the current frame of the audio/video
+function player_event_handle_loadeddata(){
+    const message =`player_event_handle_loadeddata`;
+    debug(message);
+    try{
+        setVideoIsLoadedData(true);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_loadedmetadata///////////////////////////////////////////////////////////
+//Fires when the browser has loaded meta data for the audio/video
+function player_event_handle_loadedmetadata(){
+    const message =`player_event_handle_loadedmetadata`;
+    debug(message);
+    try{
+        setVideoIsLoadedMetaData(true);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_loadstart///////////////////////////////////////////////////////////
+//Fires when the browser starts looking for the audio/video
+function player_event_handle_loadstart(){
+    const message =`player_event_handle_loadstart`;
+    debug(message);
+    try{
+        setVideoIsLoadStart(true);
+        message.info(message);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_pause///////////////////////////////////////////////////////////
+//Fires when the audio/video has been paused
+function player_event_handle_pause(){
+    const message =`player_event_handle_pause`;
+    debug(message);
+    try{
+        setVideoIsPlaying(false);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_play///////////////////////////////////////////////////////////
+//Fires when the audio/video has been started or is no longer paused
+function player_event_handle_play(){
+    const message =`player-event-handle-play`;
+    debug(message);
+    try{
+        setVideoIsPlaying(true);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_playing///////////////////////////////////////////////////////////
+//Fires when the audio/video is playing after having been paused or stopped for buffering
+function player_event_handle_playing(){
+    const message =`player-event-handle-playing`;
+    debug(message);
+    try{
+        bebug('RESUME FROM BUFFERING');
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_progress///////////////////////////////////////////////////////////
+//Fires when the browser is downloading the audio/video
+function player_event_handle_progress(){
+    const message =`player-event-handle-progress`;
+    // debug(message);
+    try{
+        if(!videoIsMediaLoading){
+            setVideoIsMediaLoading(true);
+            debug(message);
+        }
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_ratechange///////////////////////////////////////////////////////////
+//Fires when the playing speed of the audio/video is changed
+function player_event_handle_ratechange(){
+    const message =`player-event-handle-ratechange`;
+    debug(message);
+    try{
+        
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_seeked///////////////////////////////////////////////////////////
+//Fires when the user is finished moving/skipping to a new position in the audio/video
+function player_event_handle_seeked(){
+    const message =`player-event-handle-seeked`;
+    debug(message);
+    try{
+        setVideoIsSeeking(false);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_seeking///////////////////////////////////////////////////////////
+//Fires when the user starts moving/skipping to a new position in the audio/video
+function player_event_handle_seeking(){
+    debug(message);
+    const message =`player-event-handle-seeking`;
+    try{
+        setVideoIsSeeking(true);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_stalled///////////////////////////////////////////////////////////
+//Fires when the browser is trying to get media data, but data is not available
+function player_event_handle_stalled(){
+    const message =`player-event-handle-stalled`;
+    debug(message);
+    try{
+        setVideoIsStalled(true);
+        debug(`FAILURE:${message}`);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_suspend///////////////////////////////////////////////////////////
+//Fires when the browser is intentionally not getting media data
+function player_event_handle_suspend(){
+    const message =`player-event-handle-suspend`;
+    // debug(message);
+    try{
+        setVideoIsMediaLoading(false);
+        debug('VIDEO MEDIA STOPPED LOADING');
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_timeupdate///////////////////////////////////////////////////////////
+//Fires when the current playback position has changed
+function player_event_handle_timeupdate(){
+    const message =`player-event-handle-timeupdate`;
+    // debug(message);
+    try{
+        setVideoCurrentTime(video.current.currentTime);
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_volumechange///////////////////////////////////////////////////////////
+//Fires when the volume has been changed
+function player_event_handle_volumechange(){
+    const message =`player-event-handle-volumechange`;
+    debug(message);
+    try{
+        
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+//PLAYER_EVENT_HANDLE_waiting///////////////////////////////////////////////////////////
+//	Fires when the video stops because it needs to buffer the next frame
+function player_event_handle_waiting(){
+    const message =`player_event_handle_waiting`;
+    debug(message);
+    // debug(`player-event-handle-waiting`);
+    try{
+        
+    }catch{
+        debug(`FAILURE:${message}`);
+    }
+}
+
+
+
+    //PLAYER_EVENT_HANDLE_FULLSCREEN
+    function player_event_handle_fullscreen(fullscreenState){
         switch(fullscreenState){
             case true:
                 setVideoIsFullScreen(true);
+                debug(`FullScreenState: ${fullscreenState}`);
                 break;
             case false:
                 setVideoIsFullScreen(false);
+                debug(`FullScreenState: ${fullscreenState}`);
                 break;
             default:
                 debug('No fullScreen Event');
                 break
         }
     }
-    //FULLSCREEN-ACTION-REQUEST
-    function fullScreen_action_request(){
+
+//VIDEO - ACTIONS
+    //VIDEO-ACTION-PLAY
+    function video_action_play_enable(){
+        try{
+            video.current.play();
+            debug('video-action-play');
+        }catch{
+            debug('FAILED: video-action-play');
+        }
+    }
+    //VIDEO-ACTION-PAUSE
+    function video_action_play_disable(){
+        try{
+            video.current.pause();
+            debug('video-action-pause');
+        }catch{
+            debug('FAILED: video-action-pause');
+        }
+    }
+    function video_action_play_toggle(){
+        debug('video-action-play_toggle');
+        try{
+            if(video.current.paused){
+                debug('video is pause, playing');
+                video_action_play_enable();
+            }else{
+                debug('video is playing, pausing');
+                video_action_play_disable();
+            }
+        }catch{
+            debug('FAILED: video-action-play');
+        }
+    }
+    //VIDEO-ACTION-SEEK
+    function video_action_seek(value){
+        if(value<0){return}
+        try{
+            video.current.currentTime=value;
+            debug('video-action-seek:'+value);
+        }catch{
+            debug('FAILED: video-action-seek:'+value);
+        }
+    }
+    //VIDEO-ACTION-VOLUME-MUTE-ENABLE
+    function video_action_volume_mute_enable(){
+        try{
+            video.current.muted=true;
+            debug('video-action-mute-enable');
+        }catch{
+            debug('FAILED: video-action-mute-enable');
+        }
+    }
+    //VIDEO-ACTION-VOLUME-MUTE-DISABLE
+    function video_action_volume_mute_disable(){
+        try{
+            video.current.muted=false;
+            debug('video-action-mute-disable');
+        }catch{
+            debug('FAILED: video-action-mute-disable');        
+        }
+    }
+    //VIDEO-ACTION-VOLUME-MUTE-TOGGLE
+    function video_action_volume_mute_toggle(){
+        try{
+            if (video.current.muted) {
+                video_action_volume_mute_disable();
+            } else {
+                video_action_volume_mute_enable();
+            }
+        }catch{
+            debug('FAILED TO FULLSCREEN TOGGLE');
+        } 
+    }
+    //VIDEO-ACTION-VOLUME-CHANGE
+    function video_action_volume_change(value){
+        if(value<0 || value>1){return}
+        try{
+            video.current.muted=true;
+            debug('video-action-volume-change:'+value);
+        }catch{
+            debug('FAILED: video-action-volume-change:'+value);
+        }
+    }
+    //VIDEO-ACTION-FULLSCREEN-REQUEST
+    function video_action_fullscreen_enable(){
         try{
             // document.requestFullscreen()
             if (video_container.current.webkitRequestFullscreen) {
@@ -51,47 +450,120 @@ const Player=(props)=> {
             debug('FAILED TO FULLSCREEN REQUEST');
         }
     }
-    //FULLSCREEN-ACTION-EXIT
-    function fullScreen_action_exit(){
+    //VIDEO-ACTION-FULLSCREEN-EXIT
+    function video_action_fullscreen_disable(){
         try{
             document.exitFullscreen();
         }catch{
             debug('FAILED TO FULLSCREEN EXIT');
         }
     }
-    //FULLSCREEN-ACTION-TOGGLE
-    function fullScreen_action_toggle(){
+    //VIDEO-ACTION-FULLSCREEN-TOGGLE
+    function video_action_fullscreen_toggle(){
         try{
             if (document.fullscreenElement) {
-                fullScreen_action_exit();
+                video_action_fullscreen_disable();
             } else {
-                fullScreen_action_request();
+                video_action_fullscreen_enable();
             }
         }catch{
             debug('FAILED TO FULLSCREEN TOGGLE');
         } 
     }
-
     useEffect(()=>{
-//FULLSCREEN-START////////////////////////////////////////////////////////////
-    //FULLSCREEN-BUTTON
-        controls_fullScreen.current.addEventListener('click',()=>{
-            fullScreen_action_toggle();
-        });
-        //FULLSCRREEN-EVENT
-        document.addEventListener("fullscreenchange", function () {
-            // fullscreen_event_handle(document.fullscreen);
-            fullscreen_event_handle(document.fullscreenEnabled);
-        }, false);
-        document.addEventListener("mozfullscreenchange", function () {
-            fullscreen_event_handle(document.mozFullScreen);
-        }, false);
-        document.addEventListener("webkitfullscreenchange", function () {
-            fullscreen_event_handle(document.webkitIsFullScreen);
-        }, false);
-//FULLSCREEN-START////////////////////////////////////////////////////////////
-    },[]);
+//CONTROLS_PREV ////////////////////////////////////////////////////////////
+controls_prev.current.addEventListener('click',()=>{
+    debug('CONTROLS_PREV - EVENT - CLICK');
+});
 
+//CONTROLS_PLAY ////////////////////////////////////////////////////////////
+controls_play.current.addEventListener('click',()=>{
+    debug('CONTROLS_PLAY - EVENT - CLICK');
+    video_action_play_toggle();
+});
+
+//CONTROLS_NEXT ////////////////////////////////////////////////////////////
+controls_next.current.addEventListener('click',()=>{
+    debug('CONTROLS_NEXT - EVENT - CLICK');
+});
+
+//CONTROLS_VOLUME ////////////////////////////////////////////////////////////
+controls_volume.current.addEventListener('click',()=>{
+    debug('CONTROLS_VOLUME - EVENT - CLICK');
+    video_action_volume_mute_toggle();
+});
+
+//CONTROLS_TIME ////////////////////////////////////////////////////////////
+controls_time.current.addEventListener('click',()=>{
+    debug('CONTROLS_TIME - EVENT - CLICK');
+});
+
+//CONTROLS_SEEK ////////////////////////////////////////////////////////////
+controls_seek.current.addEventListener('click',()=>{
+    debug('CONTROLS_SEEK - EVENT - CLICK');
+});
+
+//CONTROLS_CHAT ////////////////////////////////////////////////////////////
+controls_chat.current.addEventListener('click',()=>{
+    debug('CONTROLS_CHAT - EVENT - CLICK');
+});
+
+//CONTROLS_FULLSCREEN ////////////////////////////////////////////////////////////
+controls_fullScreen.current.addEventListener('click',()=>{
+    debug('CONTROLS_FULLSCREEN - EVENT - CLICK');
+    video_action_fullscreen_toggle();
+});
+//VIDEO_CONTAINER ////////////////////////////////////////////////////////////
+video_container.current.addEventListener('click',()=>{
+    debug('CONTROLS_FULLSCREEN - EVENT - CLICK');
+    video_action_play_toggle();
+});
+
+
+//PLAYER_EVENT ////////////////////////////////////////////////////////////
+    //VIDEO-EVENT-PLAY
+    try{
+        video.current.addEventListener('abort',()=>{player_event_handle_abort();});
+        video.current.addEventListener('canplay',()=>{player_event_handle_canplay();});
+        video.current.addEventListener('canplaythrough',()=>{player_event_handle_canplaythrough();});
+        video.current.addEventListener('durationchange',()=>{player_event_handle_durationchange();});
+        video.current.addEventListener('emptied',()=>{player_event_handle_emptied();});
+        video.current.addEventListener('ended',()=>{player_event_handle_ended();});
+        video.current.addEventListener('loadeddata',()=>{player_event_handle_loadeddata();});
+        video.current.addEventListener('loadedmetadata',()=>{player_event_handle_loadedmetadata();});
+        video.current.addEventListener('loadstart',()=>{player_event_handle_loadstart();});
+        video.current.addEventListener('pause',()=>{player_event_handle_pause();});    
+        video.current.addEventListener('play',()=>{player_event_handle_play();});    
+        video.current.addEventListener('playing',()=>{player_event_handle_playing();});    
+        video.current.addEventListener('progress',()=>{player_event_handle_progress();});
+        video.current.addEventListener('ratechange',()=>{player_event_handle_ratechange();}); 
+        video.current.addEventListener('seeked',()=>{player_event_handle_seeked();}); 
+        video.current.addEventListener('seeking',()=>{player_event_handle_seeking();});
+        video.current.addEventListener('stalled',()=>{player_event_handle_stalled();});
+        video.current.addEventListener('suspend',()=>{player_event_handle_suspend();});
+        video.current.addEventListener('timeupdate',()=>{player_event_handle_timeupdate();});
+        video.current.addEventListener('volumechange',()=>{player_event_handle_volumechange();});
+        video.current.addEventListener('waiting',()=>{player_event_handle_waiting();});
+    }catch{
+        debug('FAILURE: VIDEO EVENT FAILURE');
+    }
+    //PLAYER-EVENT-FULLSCREEN
+    document.addEventListener("fullscreenchange", function () {
+        // player_event_handle_fullscreen(document.fullscreen);
+        player_event_handle_fullscreen(document.fullscreenEnabled);
+    }, false);
+    document.addEventListener("mozfullscreenchange", function () {
+        player_event_handle_fullscreen(document.mozFullScreen);
+    }, false);
+    document.addEventListener("webkitfullscreenchange", function () {
+        player_event_handle_fullscreen(document.webkitIsFullScreen);
+    }, false);
+
+
+    },[]);
+    const style_controls_admin={
+        visibility:userIsAdmin===true?'visible':'hidden',
+    }
     //MEDIAURL-EVENT-CHANGE
     useEffect(()=>{
         const mediaUrl = props.mediaUrl;
@@ -108,11 +580,14 @@ const Player=(props)=> {
             <div
                 className="video_controls"
             >
-                <button ref={controls_play}>play</button>
-                <button 
-                    ref={controls_fullScreen}
-                    onChange={controls_fullScreen_event_handle}
-                >fullsceen</button>
+                <button ref={controls_prev} style={style_controls_admin}>prev</button>
+                <button ref={controls_play} style={style_controls_admin}>play</button>
+                <button ref={controls_next} style={style_controls_admin}>next</button>
+                <button ref={controls_volume} >volume</button>
+                <button ref={controls_time} >{util_convertHMS(videoCurrentTime)}/{util_convertHMS(videoDuration)}</button>
+                <button ref={controls_seek} style={style_controls_admin}>seek</button>
+                <button ref={controls_chat} style={style_controls_admin}>chat</button>
+                <button ref={controls_fullScreen}>fullsceen</button>
             </div>
             <video
                 ref={video}
@@ -123,11 +598,14 @@ const Player=(props)=> {
                 }}
                 width={640}
                 // height={video.current.offsetHeight}
-                src={videoUrl}
+                // src={videoUrl}
                 controls={false}
-                autoPlay
-                muted
+                // autoPlay
+                // preload="auto"
+                // muted={videoVolumeIsMuted}
             >
+                <source src={url1}></source>
+                <source src={url2}></source>
             </video>
         </div>
     )
