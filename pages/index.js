@@ -14,7 +14,10 @@ import { DownloadOutlined } from '@ant-design/icons';
 
 // antd
 import { Typography, Divider, Button, Card } from "antd";
-import { Input } from 'antd';
+import { 
+  Input,
+  Switch,
+} from 'antd';
 const { Search } = Input;
 
 const { Title, Text } = Typography;
@@ -31,7 +34,7 @@ const url = url2;
 import './style.less';
 //SOCKET
 import io from 'Socket.IO-client';
-// const socket = io('http://localhost:3000');
+const socket = io('http://localhost:3000');
 
 const userData_Default={
 
@@ -81,16 +84,46 @@ function App(){
   }
 
   const DebuggerDiv=()=>{
+    const [posX , setPosX] = useState(0);
+    const [posY , setPosY] = useState(0);
     return (
-        <div style={{
-          position:'fixed',
-          zIndex:1000,
-          border: '1px solid grey',
-          padding:'10px',
-        }}>
+        <div
+          className="debuggerDiv" 
+          style={{
+            position:'fixed',
+            top:posY,
+            left:posX,
+            zIndex:1000,
+            backgroundColor:'grey',
+            border: '1px solid grey',
+            padding:'10px',
+            cursor:'grab',
+            display:'flex',
+            flexDirection:'column',
+          }}
+          draggable="true"
+          onDragEnd={(e)=>{
+            console.log(e);
+            e.preventDefault();
+            var x = e.pageX;
+            var y = e.pageY;
+            setPosX(x);
+            setPosY(y);
+            console.log('x'+e.clientX);
+            console.log('y'+e.clientY);
+          }}
+        >
             <span>roomId: {roomId}</span><br/>
             <span>Path:- {router.path}</span><br/>
             <span>asPath:- {router.asPath}</span><br/>
+            <Switch 
+              checkedChildren="isAdmin"
+              unCheckedChildren="notAdmin"
+              checked={isAdmin}
+              onClick={()=>{
+                setIsAdmin(!isAdmin);
+              }}
+            />
         </div>
     )
   }
@@ -128,6 +161,7 @@ function App(){
   // });
   return(
     <AppLayout>
+      <DebuggerDiv/>
       <Search 
         ref={search}
         placeholder="Enter A zxzj Link here Below"
