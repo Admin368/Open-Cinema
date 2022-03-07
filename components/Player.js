@@ -35,6 +35,8 @@ function util_convertHMS(value) {
     if (seconds < 10) {seconds = "0"+seconds;}
     return hours+':'+minutes+':'+seconds; // Return is HH : MM : SS
 }
+
+
 const Player=(props)=> {
     const [videoUrl, setVideoUrl] = useState(); 
     const [videoPoster, setVideoPoster] = useState('');
@@ -67,6 +69,14 @@ const Player=(props)=> {
     const [controlsSeekIsChanging, setControlsSeekIsChanging] = useState(false);
 
     const [userIsAdmin, setUserIsAdmin] = useState(true);
+    const [userToken, setUserToken] = useState('userToken0');
+    const [userName, setUserName] = useState('username0');
+    const [userSocketId, setUserSocketId] = useState('username0');
+
+    const [roomId, setRoomId] = useState(0);
+    const [isOnlySync, setIsOnlineSync] = useState(false);
+
+
     const video = useRef();
     const video_container = useRef();
     const controls_prev = useRef();
@@ -492,6 +502,94 @@ function player_event_handle_waiting(){
             debug('FAILED TO FULLSCREEN TOGGLE');
         } 
     }
+
+//ROOM_REQUESTS ////////////////////////////////////////////////////////////
+function room_request_send(request){
+
+}
+function room_request(request){
+// LOCAL ACTIONS
+    if(
+        request.type==='video_action_fullscreen_enable'||
+        request.type==='video_action_fullscreen_enable'||
+        request.type==='video_action_fullscreen_toggle'||
+        request.type==='video_action_volume_mute_enable'||
+        request.type==='video_action_volume_mute_disable'||
+        request.type==='video_action_volume_mute_toggle'||
+        request.type==='video_action_volume_change'||
+        request.type==='video_action_volume_fullscreen_enable'||
+        request.type==='video_action_volume_fullscreen_disable'||
+        request.type==='video_action_volume_fullscreen_toggle'
+    ){
+        room_command_video_action(request);
+        return;
+    }
+// ONLY PLACE VIDEO ACTIONS ARE REQUESTED
+    request.type = request.type||'';
+    request.value = request.value||0;
+    request.password = request.username||'';
+    request.message = request.message||'';
+
+    request.userToken = userToken||'';
+    request.userIsAdmin = userIsAdmin||'';//validate with socketId
+    request.userName = userName||'';
+    request.userSocketId = userSocketId||'';
+    request.roomId = roomId||0;
+    room_request_send(request);
+}
+
+//ROOM_EVENTS /////////////////////////////////////////////////////////////
+// ONLY PLACE VIDEO ACTIONS ARE CALLED
+function room_command_video_action(request){
+    switch(request.type){
+        case 'video_action_play_enable':
+            video_action_play_enable()
+            break;
+        case 'video_action_play_disable':
+            video_action_play_disable()
+            break;
+        case 'video_action_play_toggle':
+            video_action_play_toggle();
+            break;
+        case 'video_action_seek':
+            if(request.value>0){
+                video_action_seek(request.value);
+            }
+            break;
+        case 'video_action_volume_mute_enable':
+            video_action_volume_mute_enable();
+            break;
+        case 'video_action_volume_mute_disable':
+            video_action_volume_mute_disable();
+            break;           
+        case 'video_action_volume_mute_toggle':
+            video_action_volume_mute_toggle();
+            break;
+        case 'video_action_volume_change':
+            if(request.value>0){
+                video_action_volume_change(request.value);
+            }
+        case 'video_action_fullscreen_enable':
+            video_action_fullscreen_enable();
+            break;
+        case 'video_action_fullscreen_disable':
+            video_action_fullscreen_disable();
+            break;
+        case 'video_action_fullscreen_toggle':
+            video_action_fullscreen_toggle();
+            break;
+        default:
+            debug('ERROR: UNKOWN REQUEST TYPE:'+request.type);
+            return;
+    }
+    //if type found
+    room_request_send(request);
+
+}
+
+
+
+
     useEffect(()=>{
 //CONTROLS_PREV ////////////////////////////////////////////////////////////
 controls_prev.current.addEventListener('click',()=>{
@@ -501,7 +599,10 @@ controls_prev.current.addEventListener('click',()=>{
 //CONTROLS_PLAY ////////////////////////////////////////////////////////////
 controls_play.current.addEventListener('click',()=>{
     debug('CONTROLS_PLAY - EVENT - CLICK');
-    video_action_play_toggle();
+    // video_action_play_toggle();
+    room_request({
+        type:'video_action_play_toggle',
+    });
 });
 
 //CONTROLS_NEXT ////////////////////////////////////////////////////////////
@@ -512,7 +613,10 @@ controls_next.current.addEventListener('click',()=>{
 //CONTROLS_VOLUME ////////////////////////////////////////////////////////////
 controls_mute.current.addEventListener('click',()=>{
     debug('CONTROLS_MUTE - EVENT - CLICK');
-    video_action_volume_mute_toggle();
+    // video_action_volume_mute_toggle();
+    room_request({
+        type:'video_action_volume_mute_toggle',
+    });
 });
 
 //CONTROLS_VOLUME ////////////////////////////////////////////////////////////
@@ -543,12 +647,18 @@ controls_chat.current.addEventListener('click',()=>{
 //CONTROLS_FULLSCREEN ////////////////////////////////////////////////////////////
 controls_fullScreen.current.addEventListener('click',()=>{
     debug('CONTROLS_FULLSCREEN - EVENT - CLICK');
-    video_action_fullscreen_toggle();
+    // video_action_fullscreen_toggle();
+    room_request({
+        type:'video_action_fullscreen_toggle',
+    });
 });
 //VIDEO_CONTAINER ////////////////////////////////////////////////////////////
 video.current.addEventListener('click',()=>{
-    debug('CONTROLS_FULLSCREEN - EVENT - CLICK');
-    video_action_play_toggle();
+    debug('VIDEO - EVENT - CLICK');
+    // video_action_play_toggle();
+    room_request({
+        type:'video_action_play_toggle',
+    });
 });
 
 
