@@ -763,12 +763,12 @@ video.current.addEventListener('click',()=>{
                 <div 
                     className='controls_seek_change'
                     onMouseEnter={()=>{
-                        debug('mouse Hover');
+                        // debug('mouse Hover');
                         setControlsSeekValue(videoCurrentTime);
                         setControlsSeekisVisible(true);
                     }}
                     onMouseLeave={()=>{
-                        debug('mouse Hover');
+                        // debug('mouse Hover');
                         setControlsSeekisVisible(false);
                     }}
 

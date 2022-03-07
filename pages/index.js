@@ -40,7 +40,19 @@ const userData_Default={
 
 }
 
-function App(){
+//STORE
+import { StoreProvider, Provider } from 'easy-peasy'
+import store_main from '../stores/store_main.js';
+
+function App() {
+  return (
+      <StoreProvider store={store_main}>
+        <AppComponent/>
+      </StoreProvider>
+    )
+}
+
+function AppComponent(){
   const player = useRef();
   const search = useRef();
   const [playerStatus, setPlayerStatus] = useState();
