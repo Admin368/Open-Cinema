@@ -12,12 +12,17 @@ import {
     Spin,
     Progress,
 } from "antd";
+
+//STORE
+import {useStoreState, useStoreActions, useStoreRehydrated, useStore} from 'easy-peasy';
+import { StoreProvider, Provider } from 'easy-peasy';
+
 // import { useState } from "react/cjs/react.production.min";
 // import fullscreen from "video-react/lib/utils/fullscreen";
 //DEBUGGER
 function debug(msg){
     // console.log(`${debug.caller.name}()=>${msg}`);
-    console.log(`()=>${msg}`);
+    // console.log(`()=>${msg}`);
     if(msg.search("FAILURE")==12){
         message.error(msg);
     } else if(msg.search("SUCCESS")==12){
@@ -36,6 +41,8 @@ function util_convertHMS(value) {
     return hours+':'+minutes+':'+seconds; // Return is HH : MM : SS
 }
 
+import {socket_request_send} from '../room/sockets.js';
+import {io, socket} from '../room/sockets.js';
 
 const Player=(props)=> {
     const [videoUrl, setVideoUrl] = useState(); 
@@ -68,14 +75,25 @@ const Player=(props)=> {
     // const [controlsSeekisChanging, setControlsSeekIsChanging] = useState(false);
     const [controlsSeekIsChanging, setControlsSeekIsChanging] = useState(false);
 
-    const [userIsAdmin, setUserIsAdmin] = useState(true);
+    // const [userIsAdmin, setUserIsAdmin] = useState(true);
+    const userIsAdmin = useStoreState((state) => state.userIsAdmin);
     const [userToken, setUserToken] = useState('userToken0');
     const [userName, setUserName] = useState('username0');
-    const [userSocketId, setUserSocketId] = useState('username0');
+    const [userSocketId, setUserSocketId] = useState('');
+    // const [roomId, setRoomId] = useState(0);
+    const roomId = useStoreState((state) => state.roomId);
 
-    const [roomId, setRoomId] = useState(0);
     const [isOnlySync, setIsOnlineSync] = useState(false);
+    const roomIsConnected = useStoreState((state) => state.roomIsConnected);
 
+    const lastCommandTarget = useStoreState((state) => state.lastCommandTarget );
+    const lastCommandType = useStoreState((state) => state.lastCommandType);
+    const lastCommandValue = useStoreState((state) => state.lastCommandValue);
+    const lastCommandTimeStamp = useStoreState((state) => state.lastCommandTimeStamp);
+
+
+//GLOBAL STORE 
+    const store_setState = useStoreActions((actions) => actions.store_setState);
 
     const video = useRef();
     const video_container = useRef();
@@ -328,12 +346,18 @@ function player_event_handle_suspend(){
 }
 //PLAYER_EVENT_HANDLE_timeupdate///////////////////////////////////////////////////////////
 //Fires when the current playback position has changed
-const player_event_handle_timeupdate=(isSeeking)=>{
+const player_event_handle_timeupdate=()=>{
     const message =`player-event-handle-timeupdate`;
     // debug(message);
     try{
         const currentTime = video.current.currentTime
         setVideoCurrentTime(currentTime);
+        // console.log(userIsAdmin);
+        const request={
+            type:'media_time_update',
+            value:currentTime,
+        }
+        room_request(request);   
         // if(!isSeeking){
         //     debug('seek Allowed'+isSeeking);
         //     setControlsSeekValue(currentTime);
@@ -409,10 +433,16 @@ function player_event_handle_waiting(){
         try{
             if(video.current.paused){
                 debug('video is pause, playing');
-                video_action_play_enable();
+                // video_action_play_enable();
+                room_request({
+                    type:'video_action_play_enable',
+                });
             }else{
                 debug('video is playing, pausing');
-                video_action_play_disable();
+                // video_action_play_disable();
+                room_request({
+                    type:'video_action_play_disable',
+                });
             }
         }catch{
             debug('FAILED: video-action-play');
@@ -504,42 +534,63 @@ function player_event_handle_waiting(){
     }
 
 //ROOM_REQUESTS ////////////////////////////////////////////////////////////
-function room_request_send(request){
 
-}
 function room_request(request){
-// LOCAL ACTIONS
-    if(
-        request.type==='video_action_fullscreen_enable'||
-        request.type==='video_action_fullscreen_enable'||
-        request.type==='video_action_fullscreen_toggle'||
-        request.type==='video_action_volume_mute_enable'||
-        request.type==='video_action_volume_mute_disable'||
-        request.type==='video_action_volume_mute_toggle'||
-        request.type==='video_action_volume_change'||
-        request.type==='video_action_volume_fullscreen_enable'||
-        request.type==='video_action_volume_fullscreen_disable'||
-        request.type==='video_action_volume_fullscreen_toggle'
-    ){
-        room_command_video_action(request);
-        return;
-    }
-// ONLY PLACE VIDEO ACTIONS ARE REQUESTED
-    request.type = request.type||'';
-    request.value = request.value||0;
-    request.password = request.username||'';
-    request.message = request.message||'';
+    console.log(userIsAdmin);
+ 
+    // LOCAL ACTIONS
+        if(
+            request.type==='video_action_fullscreen_enable'||
+            request.type==='video_action_fullscreen_enable'||
+            request.type==='video_action_fullscreen_toggle'||
+            request.type==='video_action_volume_mute_enable'||
+            request.type==='video_action_volume_mute_disable'||
+            request.type==='video_action_volume_mute_toggle'||
+            request.type==='video_action_volume_change'||
+            request.type==='video_action_volume_fullscreen_enable'||
+            request.type==='video_action_volume_fullscreen_disable'||
+            request.type==='video_action_volume_fullscreen_toggle'||
+            request.type==='video_action_play_toggle'
+        ){
+            room_command_video_action(request);
+            return;
+        }
+    if(userIsAdmin){
+        console.log('isAdmin')
+    // ONLY PLACE VIDEO ACTIONS ARE REQUESTED
+        request.type = request.type||'';
+        request.value = request.value||0;
+        request.password = request.username||'';
+        request.message = request.message||'';
 
-    request.userToken = userToken||'';
-    request.userIsAdmin = userIsAdmin||'';//validate with socketId
-    request.userName = userName||'';
-    request.userSocketId = userSocketId||'';
-    request.roomId = roomId||0;
-    room_request_send(request);
+        request.userToken = userToken||'';
+        request.userIsAdmin = userIsAdmin||'';//validate with socketId
+        request.userName = userName||'';
+        request.userSocketId = userSocketId||'';
+        request.roomId = roomId||0;
+
+        request.mediaCurrentTime = video.current.currentTime||0;
+
+        socket_request_send(request);
+    } else {
+        console.log('NOT ADMIN');
+    }
 }
 
 //ROOM_EVENTS /////////////////////////////////////////////////////////////
 // ONLY PLACE VIDEO ACTIONS ARE CALLED
+socket.off(`room_0_player`);
+socket.on(`room_0_player`,async(command)=>{
+    // console.log('lastCommandTimeStamp'+lastCommandTimeStamp);
+    if(command.timeStamp!==lastCommandTimeStamp){
+        await store_setState({
+            state:'lastCommandTimeStamp',
+            value:command.timeStamp,
+        });
+        console.log(command);
+        room_command_video_action(command);
+    }
+});
 function room_command_video_action(request){
     switch(request.type){
         case 'video_action_play_enable':
@@ -579,22 +630,20 @@ function room_command_video_action(request){
             video_action_fullscreen_toggle();
             break;
         default:
-            debug('ERROR: UNKOWN REQUEST TYPE:'+request.type);
+            debug('ERROR: UNKOWN COMMAND:'+request.type);
             return;
     }
     //if type found
-    room_request_send(request);
-
+    // socket_request_send(request);
 }
-
 
 
 
     useEffect(()=>{
 //CONTROLS_PREV ////////////////////////////////////////////////////////////
-controls_prev.current.addEventListener('click',()=>{
+    controls_prev.current.addEventListener('click',()=>{
     debug('CONTROLS_PREV - EVENT - CLICK');
-});
+},[]);
 
 //CONTROLS_PLAY ////////////////////////////////////////////////////////////
 controls_play.current.addEventListener('click',()=>{
@@ -764,8 +813,10 @@ video.current.addEventListener('click',()=>{
                     className='controls_seek_change'
                     onMouseEnter={()=>{
                         // debug('mouse Hover');
-                        setControlsSeekValue(videoCurrentTime);
-                        setControlsSeekisVisible(true);
+                        if(userIsAdmin){
+                            setControlsSeekValue(videoCurrentTime);
+                            setControlsSeekisVisible(true);
+                        }
                     }}
                     onMouseLeave={()=>{
                         // debug('mouse Hover');
