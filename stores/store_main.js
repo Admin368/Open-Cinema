@@ -39,6 +39,18 @@ export const settingsStore = createStore({
     settingBeingChanged:'default',
     dummy:'',
 
+    roomId:0,
+    roomIsConnected:false,
+    userIsAdmin:false,
+    userToken:'userToken0',
+    userName:'username0',
+    userSocketId:'socketId0',
+
+    lastCommandTarget:'',
+    lastCommandType:'',
+    lastCommandValue:'',
+    lastCommandTimeStamp:0,
+
 
     //SETTINGS
     default: {
@@ -53,7 +65,9 @@ export const settingsStore = createStore({
       type:'text',
       description:'This is Your Username',
     },
-
+    store_setState:action((state, payload)=>{
+        state[payload.state]= payload.value;
+    }),
     setValue:action((state, payload)=>{
       state[payload.setting]= payload.data;
     }),
