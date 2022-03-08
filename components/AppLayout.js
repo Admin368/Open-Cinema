@@ -135,14 +135,14 @@ const AppLayout = props => {
             </Link>
           </Menu.Item> */}
 
-          {/* <Menu.Item key="2">
-            <Link href="/watch">
+          <Menu.Item key="2">
+            <Link href="/room/0">
               <div>
                 <VideoCameraOutlined />
                 <span className="nav-text">Watch</span>
               </div>
             </Link>
-          </Menu.Item> */}
+          </Menu.Item>
 
           {/* <Menu.Item key="3">
             <Link href="/backup">
