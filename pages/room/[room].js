@@ -81,7 +81,7 @@ function AppComponent(){
     //console.log('setting up Link'+searchValue);
     message.info('Checking Link');
       const result = await axios
-        .get('./api/getLink?link='+searchValue)
+        .get('../../api/getLink?link='+searchValue)
         .then(async(res)=> {
             //console.log(`statusCode: ${res.status}`)
             //console.log(res.data)
@@ -232,6 +232,7 @@ function AppComponent(){
       <DebuggerDiv/>
       <Search 
         ref={search}
+        disabled={!userIsAdmin}
         placeholder="Enter A zxzj Link here Below"
         // value={searchValue}
         onChange={()=>{
