@@ -41,9 +41,13 @@ function util_convertHMS(value) {
     return hours+':'+minutes+':'+seconds; // Return is HH : MM : SS
 }
 
-import {socket_request_send} from '../room/sockets.js';
-import {io, socket} from '../room/sockets.js';
+import {socket_request_send} from '../room/room_sockets.js';
+import {io, socket} from '../room/room_sockets.js';
 
+function room_request_external(request, isAdmin){
+    console.log(request);
+    console.log('External_isAdmin'+isAdmin);
+}
 const Player=(props)=> {
     const [videoUrl, setVideoUrl] = useState(); 
     const [videoPoster, setVideoPoster] = useState('');
@@ -77,6 +81,9 @@ const Player=(props)=> {
 
     // const [userIsAdmin, setUserIsAdmin] = useState(true);
     const userIsAdmin = useStoreState((state) => state.userIsAdmin);
+    // const [userIsAdmin, setUserIsAdmin] = useState(false);
+    const [userIsAdminLocal, setUserIsAdminLocal] = useState(false);
+    // useEffect(()=>{},userSocketId)
     const [userToken, setUserToken] = useState('userToken0');
     const [userName, setUserName] = useState('username0');
     const [userSocketId, setUserSocketId] = useState('');
@@ -104,7 +111,7 @@ const Player=(props)=> {
     const controls_volume = useRef();
     const controls_time = useRef();
     const controls_seek = useRef();
-    const controls_seeker = useRef();
+    // const controls_seeker = useRef();
     const controls_chat = useRef();
     const controls_fullScreen = useRef();
 
@@ -357,7 +364,7 @@ const player_event_handle_timeupdate=()=>{
             type:'media_time_update',
             value:currentTime,
         }
-        room_request(request);   
+        // room_request(request);   
         // if(!isSeeking){
         //     debug('seek Allowed'+isSeeking);
         //     setControlsSeekValue(currentTime);
@@ -534,9 +541,24 @@ function player_event_handle_waiting(){
     }
 
 //ROOM_REQUESTS ////////////////////////////////////////////////////////////
+// useEffect(()=>{
+//     const isAdmin=props.userIsAdmin;
+//     console.log(isAdmin);
+//     setUserIsAdmin(isAdmin);
+//     // consol
+//     // setUserIsAdminLocal(userIsAdmin);
+//     // console.log('userIsAdminLocal:'+userIsAdmin);
+// },[props.userIsAdmin]);
 
-function room_request(request){
-    console.log(userIsAdmin);
+const room_request_=async(request)=>{
+    setUserIsAdminLocal((state)=>state);
+    room_request_external(request, userIsAdminLocal);
+}
+const room_request=async(request)=>{
+    // setUserIsAdminLocal((state)=>state);
+    const isAdmin = userIsAdmin;
+    console.log('userIsAdmin:'+userIsAdmin+' room_request_userIsAdmin:'+isAdmin);
+    // console.log('room_request_userIsAdmin:'+isAdmin);
  
     // LOCAL ACTIONS
         if(
@@ -555,7 +577,7 @@ function room_request(request){
             room_command_video_action(request);
             return;
         }
-    if(userIsAdmin){
+    if(isAdmin){
         console.log('isAdmin')
     // ONLY PLACE VIDEO ACTIONS ARE REQUESTED
         request.type = request.type||'';
@@ -638,12 +660,34 @@ function room_command_video_action(request){
 }
 
 
-
+const removeEvents=(elem)=>{
+    elem.current.replaceWith(elem.current.cloneNode(true));
+}
+const removeAllEvents=()=>{
+    const elements = [
+        // video,
+        // video_container,
+        // controls_prev,
+        // controls_play,
+        // controls_next,
+        controls_mute,
+        // controls_volume,
+        // controls_time,
+        // controls_seek,
+        // // controls_seeker,
+        // controls_chat,
+        // controls_fullScreen,
+    ];
+    elements.map((element)=>{
+        removeEvents(element);
+    });
+}
     useEffect(()=>{
+// removeAllEvents();
 //CONTROLS_PREV ////////////////////////////////////////////////////////////
-    controls_prev.current.addEventListener('click',()=>{
+controls_prev.current.addEventListener('click',()=>{
     debug('CONTROLS_PREV - EVENT - CLICK');
-},[]);
+});
 
 //CONTROLS_PLAY ////////////////////////////////////////////////////////////
 controls_play.current.addEventListener('click',()=>{
@@ -659,7 +703,8 @@ controls_next.current.addEventListener('click',()=>{
     debug('CONTROLS_NEXT - EVENT - CLICK');
 });
 
-//CONTROLS_VOLUME ////////////////////////////////////////////////////////////
+//CONTROLS_MUTE ////////////////////////////////////////////////////////////
+controls_mute.current.removeEventListener('click',()=>{});
 controls_mute.current.addEventListener('click',()=>{
     debug('CONTROLS_MUTE - EVENT - CLICK');
     // video_action_volume_mute_toggle();
@@ -751,7 +796,7 @@ video.current.addEventListener('click',()=>{
     }, false);
 
 
-    },[]);
+},[userIsAdmin]);
     const style_controls_admin={
         visibility:userIsAdmin===true?'visible':'hidden',
     }
@@ -763,6 +808,10 @@ video.current.addEventListener('click',()=>{
             setVideoUrl(mediaUrl);
         }
     },[props.mediaUrl]);
+    // useEffect(()=>{
+    //     console.log('ADMIN PRIVILAGES CHANGE');
+    //     setUserIsAdminLocal(userIsAdmin);
+    // },[userIsAdmin]);
     return(
         <div
             ref={video_container}
@@ -771,6 +820,7 @@ video.current.addEventListener('click',()=>{
             <div
                 className="video_controls"
             >
+                {userIsAdmin===true?<span> Admin {userIsAdmin} </span>:null}
                 <button ref={controls_prev} style={style_controls_admin}>prev</button>
                 <button ref={controls_play} style={style_controls_admin}>play</button>
                 <button ref={controls_next} style={style_controls_admin}>next</button>
