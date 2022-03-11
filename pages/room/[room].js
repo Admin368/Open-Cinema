@@ -32,7 +32,7 @@ const url = url2;
 
 import './style.less';
 
-import {io, socket} from '../../room/sockets.js';
+import {io, socket} from '../../room/room_sockets.js';
 
 const userData_Default={
 
@@ -249,7 +249,10 @@ function AppComponent(){
           // bottom:0,
         }}
       />
-      <Player mediaUrl={mediaUrl}/>
+      <Player
+        mediaUrl={mediaUrl}
+        userIsAdmin={userIsAdmin}
+      />
       <Divider />
     </AppLayout>
   );
