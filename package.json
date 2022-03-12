@@ -22,6 +22,7 @@
     "null-loader": "3.0.0",
     "react": "^16.13.0",
     "react-cookie": "^4.1.1",
+    "react-cookies": "^0.1.1",
     "react-dom": "^16.13.0",
     "react-player": "^2.9.0",
     "react-video-js-player": "^1.1.1",
