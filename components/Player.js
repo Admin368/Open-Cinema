@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { render } from "less";
+import cookie from 'react-cookies';
 const url1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaaeca.f0.mp4?dis_k=b8bb5e864066b469fc2af0aed9ac81fa&dis_t=1644942290.mp4';
 const url2 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 
@@ -98,10 +99,10 @@ const Player=(props)=> {
     const lastCommandValue = useStoreState((state) => state.lastCommandValue);
     const lastCommandTimeStamp = useStoreState((state) => state.lastCommandTimeStamp);
 
-
+    // const [cookies, setCookie, removeCookie] = useCookies(['cookie-name']);
 //GLOBAL STORE 
     const store_setState = useStoreActions((actions) => actions.store_setState);
-
+    const [roomFn, setRoomFn] = useState(()=>x=>'data:'+x);
     const video = useRef();
     const video_container = useRef();
     const controls_prev = useRef();
@@ -541,14 +542,22 @@ function player_event_handle_waiting(){
     }
 
 //ROOM_REQUESTS ////////////////////////////////////////////////////////////
+useEffect(()=>{
+    // const isAdmin = cookies.userIsAdmin;
+    // console.log('userIsAdmin:'+isAdmin);
+    // setCookie('userIsAdmin',userIsAdmin);
+    cookie.save('userIsAdmin', userIsAdmin, { path: '/' });
+    // const roomFn_new=(data)=>{
+    //     const isAdminFn = isAdmin;
+    //     console.log('isAdminFn:'+isAdminFn+' data:'+data);
+    // }
+    // console.log('isAdmin:'+userIsAdmin);
+    // setRoomFn(()=>x=>console.log('user:'+x+'IsAdmin:'+userIsAdmin));
+},[userIsAdmin]);
+
 // useEffect(()=>{
-//     const isAdmin=props.userIsAdmin;
-//     console.log(isAdmin);
-//     setUserIsAdmin(isAdmin);
-//     // consol
-//     // setUserIsAdminLocal(userIsAdmin);
-//     // console.log('userIsAdminLocal:'+userIsAdmin);
-// },[props.userIsAdmin]);
+//     console.log('cookie changed');
+// },[cookies])
 
 const room_request_=async(request)=>{
     setUserIsAdminLocal((state)=>state);
@@ -556,8 +565,11 @@ const room_request_=async(request)=>{
 }
 const room_request=async(request)=>{
     // setUserIsAdminLocal((state)=>state);
-    const isAdmin = userIsAdmin;
-    console.log('userIsAdmin:'+userIsAdmin+' room_request_userIsAdmin:'+isAdmin);
+    const isAdmin = cookie.load('userIsAdmin');
+    console.log('cooker_IsUserAdmin:'+isAdmin);
+    // const isAdmin = userIsAdmin;
+    roomFn('paulo');
+    // console.log('userIsAdmin:'+userIsAdmin+' room_request_userIsAdmin:'+isAdmin);
     // console.log('room_request_userIsAdmin:'+isAdmin);
  
     // LOCAL ACTIONS
@@ -796,7 +808,7 @@ video.current.addEventListener('click',()=>{
     }, false);
 
 
-},[userIsAdmin]);
+},[]);
     const style_controls_admin={
         visibility:userIsAdmin===true?'visible':'hidden',
     }
