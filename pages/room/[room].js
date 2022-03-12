@@ -32,7 +32,7 @@ const url = url2;
 
 import './style.less';
 
-import {io, socket} from '../../room/room_sockets.js';
+import {io, socket, serverUrl} from '../../room/room_sockets.js';
 
 const userData_Default={
 
