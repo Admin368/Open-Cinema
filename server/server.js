@@ -1038,6 +1038,10 @@ app.get('/media_get',async (req, res) => {
     
     // res.sendFile(__dirname +'/socket_ui/index.html');
 });
+app.get('/request', (req, res) => {
+    console.log(req);
+    // res.send('<p>MV2</p>');
+});
 //@API_FUNCTIONS
 
 
@@ -1049,6 +1053,7 @@ const server_socket_init=()=>{
         reconnection:true,
         reconnectionDelay: 30000,
         reconnectionDelayMax: 10000,
+        reconnectionAttempts: 10,
         autoConnect: false,
         cors: {
             origin: '*',
@@ -1126,7 +1131,14 @@ const server_socket_init=()=>{
                 request.userSocketId = request.userSocketId||socket.id;
                 request.roomId = request.roomId||0;
                 
-                console.log(request);
+                // console.log(request);
+                if(
+                    request.type==='media_time_update'
+                ){
+
+                } else {
+                    console.log(request);
+                }
 
                 const command = {
                     roomId : request.roomId,
@@ -1187,6 +1199,11 @@ const server_socket_init=()=>{
                     case 'video_action_fullscreen_toggle':
                         playerDefault();
                         break;
+                    case 'media_time_update':
+                        const currentTime = request.value;
+                        console.log(currentTime);
+                        // playerDefault();
+                        break;
                     default:
                         debug('ERROR: UNKOWN REQUEST TYPE:'+request.type);
                         return;
@@ -1199,7 +1216,7 @@ const server_socket_init=()=>{
                         break;
                     case 'player':
                         // socket.emit('room_'+request.roomId+'_player', command);
-                        console.log(socket.handshake.issued);
+                        // console.log(socket.handshake.issued);
                         io.emit('room_'+request.roomId+'_player', command);
                         break;
                     case 'chat':
