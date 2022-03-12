@@ -215,8 +215,24 @@ function AppComponent(){
       }
     }
   },[query]);
-  useEffect(()=>{
 
+
+  useEffect(()=>{
+    socket.on(`all`,async(command)=>{room_command_page_action(command);});
+    socket.on(`socket_${socket.id}`,async(command)=>{room_command_page_action(command);});
+    socket.on(`page`,async(command)=>{room_command_page_action(command);});
+    function room_command_page_action(request){
+      switch(request.type){
+        case 'page_action_refresh':
+          router.reload();
+          break;
+        case 'socket_action_admin_disable':
+          break;
+        case 'socket_action_admin_disable':
+          break;
+        default:
+      }
+    }
     // setMediaUrl(url3);
     // router.push({
     //   pathname: '/',
@@ -249,6 +265,9 @@ function AppComponent(){
           // bottom:0,
         }}
       />
+      <button type="button" onClick={() => router.reload()}>
+        Click here to reload
+      </button>
       <Player
         mediaUrl={mediaUrl}
         userIsAdmin={userIsAdmin}
