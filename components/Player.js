@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { render } from "less";
-import cookie from 'react-cookies';
+// import cookie from 'react-cookies';
 const url1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaaeca.f0.mp4?dis_k=b8bb5e864066b469fc2af0aed9ac81fa&dis_t=1644942290.mp4';
 const url2 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 
@@ -17,6 +17,10 @@ import {
 //STORE
 import {useStoreState, useStoreActions, useStoreRehydrated, useStore} from 'easy-peasy';
 import { StoreProvider, Provider } from 'easy-peasy';
+
+import {cookies_setUserInfo, cookies_getUserInfo} from '../storage/storage.js';
+import {socket_request_send, room_request} from '../room/room_sockets.js';
+import {io, socket} from '../room/room_sockets.js';
 
 // import { useState } from "react/cjs/react.production.min";
 // import fullscreen from "video-react/lib/utils/fullscreen";
@@ -42,46 +46,45 @@ function util_convertHMS(value) {
     return hours+':'+minutes+':'+seconds; // Return is HH : MM : SS
 }
 
-import {socket_request_send} from '../room/room_sockets.js';
-import {io, socket} from '../room/room_sockets.js';
 
-function cookies_setUserInfo(key, value){
-    const template ={
-        userIsAdmin:'',
-        userToken:'',
-    }
-    try{
-        cookie.save(key, value, { path: '/' });
-    } catch {
-        debug('ERROR: failed to cookies_setUserInfo key:'+key+' value:'+value);
-    }
-}
-function cookies_getUserInfo(key){
-    // console.log('key:'+key);
-    try{
-        const value = cookie.load(key);
-        // console.log('value:'+value);
-        switch(value){
-            case 'true':
-                return true;
-                break;
-            case 'false':
-                return false;
-            default:
-                return value;
-        }
-        // return value;
-    } catch {
-        debug('ERROR: failed to cookies_getUserIsAdmin:'+key);
-    }
-}
+// function cookies_setUserInfo(key, value){
+//     const template ={
+//         userIsAdmin:'',
+//         userToken:'',
+//     }
+//     try{
+//         cookie.save(key, value, { path: '/' });
+//     } catch {
+//         debug('ERROR: failed to cookies_setUserInfo key:'+key+' value:'+value);
+//     }
+// }
+// function cookies_getUserInfo(key){
+//     // console.log('key:'+key);
+//     try{
+//         const value = cookie.load(key);
+//         // console.log('value:'+value);
+//         switch(value){
+//             case 'true':
+//                 return true;
+//                 break;
+//             case 'false':
+//                 return false;
+//             default:
+//                 return value;
+//         }
+//         // return value;
+//     } catch {
+//         debug('ERROR: failed to cookies_getUserIsAdmin:'+key);
+//     }
+// }
 
-function room_request_external(request, isAdmin){
-    console.log(request);
-    console.log('External_isAdmin'+isAdmin);
-}
+// function room_request_external(request, isAdmin){
+//     console.log(request);
+//     console.log('External_isAdmin'+isAdmin);
+// }
 const Player=(props)=> {
     const router = useRouter();
+    const [goldernDelay, setGoldenDelay] = useState(2000); //milliseconds for sync waiting
     const [videoUrl, setVideoUrl] = useState(); 
     const [videoPoster, setVideoPoster] = useState('');
     const [videoVolume, setVideoVolume] = useState(0.5);
@@ -580,14 +583,7 @@ const room_request_=async(request)=>{
     room_request_external(request, userIsAdminLocal);
 }
 const room_request=async(request)=>{
-    // setUserIsAdminLocal((state)=>state);
     const isAdmin = cookies_getUserInfo('userIsAdmin');
-    // console.log('cooker_IsUserAdmin:'+isAdmin);
-    // const isAdmin = userIsAdmin;
-    // roomFn('paulo');
-    // console.log('userIsAdmin:'+userIsAdmin+' room_request_userIsAdmin:'+isAdmin);
-    // console.log('room_request_userIsAdmin:'+isAdmin);
- 
     // LOCAL ACTIONS
         if(
             request.type==='video_action_fullscreen_enable'||
@@ -605,8 +601,12 @@ const room_request=async(request)=>{
             room_command_video_action(request);
             return;
         }
+        // DONT DO TIME UUPDATE IF PAUSED
+        // if(request.type==='media_time_update'&&video.current.paused){
+        //     debug('dont update paused');
+        //     return;
+        // }
     if(isAdmin){
-        // console.log('isAdmin');
     // ONLY PLACE VIDEO ACTIONS ARE REQUESTED
         request.type = request.type||'';
         request.value = request.value||0;
@@ -629,65 +629,97 @@ const room_request=async(request)=>{
 
 //ROOM_EVENTS /////////////////////////////////////////////////////////////
 // ONLY PLACE VIDEO ACTIONS ARE CALLED
-socket.on('recone')
 socket.off(`room_0_player`);
-socket.on(`room_0_player`,async(command)=>{
-    // console.log('lastCommandTimeStamp'+lastCommandTimeStamp);
-    room_command_video_action(command);
+socket.on(`all`,async(command)=>{room_command_video_action(command);});
+socket.on(`room_0_player`,async(command)=>{room_command_video_action(command);});
 
-    // if(command.timeStamp!==lastCommandTimeStamp){
-    //     await store_setState({
-    //         state:'lastCommandTimeStamp',
-    //         value:command.timeStamp,
-    //     });
-    //     console.log(command);
-    //     room_command_video_action(command);
-    // }
-});
+
+
 function room_command_video_action(request){
-    switch(request.type){
-        case 'video_action_play_enable':
-            video_action_play_enable()
-            break;
-        case 'video_action_play_disable':
-            video_action_play_disable()
-            break;
-        case 'video_action_play_toggle':
-            video_action_play_toggle();
-            break;
-        case 'video_action_seek':
-            if(request.value>0){
+    try{
+        switch(request.type){
+            case 'video_action_play_enable':
+                video_action_play_enable();
+                break;
+            case 'video_action_play_enable_sync':
+                // message.info('sync_playing');
+                console.log('seekValue:'+request.value);
+                if(sync_play){clearInterval(sync_pause);}
                 video_action_seek(request.value);
-            }
-            break;
-        case 'video_action_volume_mute_enable':
-            video_action_volume_mute_enable();
-            break;
-        case 'video_action_volume_mute_disable':
-            video_action_volume_mute_disable();
-            break;           
-        case 'video_action_volume_mute_toggle':
-            video_action_volume_mute_toggle();
-            break;
-        case 'video_action_volume_change':
-            if(request.value>0){
-                video_action_volume_change(request.value);
-            }
-        case 'video_action_fullscreen_enable':
-            video_action_fullscreen_enable();
-            break;
-        case 'video_action_fullscreen_disable':
-            video_action_fullscreen_disable();
-            break;
-        case 'video_action_fullscreen_toggle':
-            video_action_fullscreen_toggle();
-            break;
-        case 'page_action_refresh':
-            router.reload();
-            break;
-        default:
-            debug('ERROR: UNKOWN COMMAND:'+request.type);
-            return;
+                const sync_play = setTimeout(() => {
+                    video_action_play_enable();
+                }, goldernDelay);
+                break;
+            case 'video_action_play_disable':
+                video_action_play_disable()
+                break;
+            case 'video_action_play_disable_sync':
+                // console.log('seekValue:'+request.value);
+                // video_action_seek(request.value);
+                const roomMediaTime=request.value;
+                const currentMediaTime = video.current.currentTime; 
+                const difference = roomMediaTime-currentMediaTime;
+                console.log('pauseDifference:'+difference);
+                // message.info(difference.substring(0,3));
+                if(difference>0&&difference<10){
+                    const sync_pause = setTimeout(() => {
+                        //if behind wait till catch up to stop
+                        video_action_play_disable();   
+                    }, difference*1000);
+                }else if(difference>10){
+                        //too far away to wait for you
+                    video_action_seek(value);
+                    video_action_play_disable();
+                }else{
+
+                    video_action_play_disable();
+                }
+                
+                break;
+            case 'video_action_play_toggle':
+                video_action_play_toggle();
+                break;
+            case 'video_action_seek':
+                if(request.value>0){
+                    if(!video.current.paused){
+                        video_action_play_disable();
+                        video_action_seek(request.value);
+                        setTimeout(() => {
+                            video_action_play_enable();
+                        }, goldernDelay);
+                    }else{
+                        video_action_seek(request.value);
+                    }
+                }
+                break;
+            case 'video_action_volume_mute_enable':
+                video_action_volume_mute_enable();
+                break;
+            case 'video_action_volume_mute_disable':
+                video_action_volume_mute_disable();
+                break;           
+            case 'video_action_volume_mute_toggle':
+                video_action_volume_mute_toggle();
+                break;
+            case 'video_action_volume_change':
+                if(request.value>0){
+                    video_action_volume_change(request.value);
+                }
+            case 'video_action_fullscreen_enable':
+                video_action_fullscreen_enable();
+                break;
+            case 'video_action_fullscreen_disable':
+                video_action_fullscreen_disable();
+                break;
+            case 'video_action_fullscreen_toggle':
+                video_action_fullscreen_toggle();
+                break;
+            default:
+                debug('ERROR: UNKOWN COMMAND:'+request.type);
+                return;
+        }
+    }catch{
+        debug('ERROR: ROOM ACTION FAILED');
     }
     //if type found
     // socket_request_send(request);
@@ -899,7 +931,8 @@ video.current.addEventListener('click',()=>{
                         onAfterChange={(value)=>{
                             debug('seeking - done');
                             const newTime=value;
-                            video_action_seek(newTime);
+                            // video_action_seek(newTime);
+                            room_request({type:'video_action_seek',value:newTime})
                             setControlsSeekValue(newTime);
                             // setControlsSeekIsChanging(false);
                         }}
@@ -922,6 +955,7 @@ video.current.addEventListener('click',()=>{
             <Spin className='video_spinner' spinning={videoIsBuffering} tip='Loading...'>
                 <video
                     ref={video}
+                    id='video'
                     className='video'
                     style={{
                         width:'100%',
