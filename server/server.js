@@ -9,6 +9,13 @@ const config = { }
 const math = create(all, config);
 const axios = require('axios');
 
+const bcrypt = require('bcrypt');
+const { is } = require('express/lib/request');
+const { contentType } = require('express/lib/response');
+// const { io } = require('socket.io-client');
+// const { socket } = require('../room/room_sockets');
+// const { socket } = require('../room/room_sockets');
+const bcrypt_saltRounds = 10;
 
 var test = 0;
 var test_hash = 0;
@@ -60,6 +67,27 @@ function debug(msg){
     console.log(text_type+text_color+text);
 }
 
+//@SOCKET SETUP
+// try{
+    const io = require("socket.io")(server, {
+        timeout:50000,
+        reconnection:true,
+        reconnectionDelay: 30000,
+        reconnectionDelayMax: 10000,
+        reconnectionAttempts: 10,
+        autoConnect: false,
+        cors: {
+            origin: '*',
+        }
+    });
+    instrument(io, {
+        auth: false
+    });
+    io.bin
+// }catch{
+    // debug('FAILED TO START SOCKET SERVER');
+    // server_shutdown();
+// }
 
 ///CLI_SETUP
 
@@ -95,6 +123,13 @@ process.stdin.on('keypress', (str, key) => {
     //   debug(JSON.stringify(rooms_array));
       if(isDebuging==true){console.log(rooms_array)}
     }
+    if(key.name=='p'){
+        debug('============REFRESH EVERONE===============');
+        // io.emit('all', {
+        //     type:'page_action_refresh'
+        // });
+        server_all_room_reload();
+      }
     // if(Number.isInteger(key.name)){
     //PRINT USERS IN ROOM
     if(math.hasNumericValue(key.name)){
@@ -328,10 +363,7 @@ const database_query=async({query=null})=>{
     });
 }
 //CRYPTO
-const bcrypt = require('bcrypt');
-const { is } = require('express/lib/request');
-const { contentType } = require('express/lib/response');
-const bcrypt_saltRounds = 10;
+
 
 
 const utility_password_hash=async({password=null})=>{
@@ -676,11 +708,12 @@ class room{
       this.roomPassword= roomPassword||1234;
       this.roomIsActive = true;
       this.roomTimeCreated = Date.now();
+      this.roomMediaIsPlaying = false;
       this.roomMediaId = roomMediaId;
       this.roomMediaUrl= roomMediaUrl;
       this.roomMediaPosterUrl= roomMediaPosterUrl;
       this.roomMediaSource= roomMediaSource;
-      this.roomMediaCurrentTime= roomMediaCurrentTime;
+      this.roomMediaCurrentTime= roomMediaCurrentTime||0;
       this.roomStartTime = roomStartTime;
       this.roomEndTime = roomEndTime;
       this.roomIsStarted = false;
@@ -904,7 +937,12 @@ const server_room_user_disconnect=()=>{} //remove disconnection
 
 const server_room_close=(roomId)=>{}
 
-
+const server_all_room_reload=()=>{
+    server_socket_command({
+        target:'all',
+        type:'page_action_refresh'
+    })
+}
 
 
 //chats
@@ -1044,24 +1082,154 @@ app.get('/request', (req, res) => {
 });
 //@API_FUNCTIONS
 
+const server_socket_command=(
+    request,
+    command = {
+        // ...request
+        roomId : request.roomId,
+        target : request.target, //player / chat 
+        type: '',
+        value : '',
+        timeStamp: date = new Date().getTime(),
+    }
+    )=>{
+    // console.log(request)
+    // const command = {
+    //     roomId : request.roomId,
+    //     target : '', //player / chat 
+    //     type: '',
+    //     value : '',
+    //     timeStamp: date = new Date().getTime(),
+    // }
+    // command=request;
+    function roomDefault(){
+        command.target='room';
+        command.type=request.type;
+        command.value=request.value;
+    }
+    function playerDefault(){
+        command.target='player';
+        command.type=request.type;
+        command.value=request.value;
+    }
+    function chatDefault(){
+        command.target='player';
+        command.type=request.type;
+        command.value=request.value;
+    }
+    const roomId = request.roomId?request.roomId:0;
+    const room = server_room_get_room({roomId});
+    // const currentTime = request.mediaCurrentTime||0;
+    switch(request.type){
+        case 'room_joined':
+            command.target='player';
+            command.type='room_joined';
+            command.value={
+                roomMediaUrl:room.roomMediaIsPlaying,
+                roomMediaIsPlaying:room.roomMediaIsPlaying,
+                roomMediaCurrentTime:room.roomMediaCurrentTime,
+            };
+            // playerDefault();
+            break;
+        case 'video_action_play_enable':
+            command.target='player';
+            command.type='video_action_play_enable_sync';
+            // command.value=currentTime;
+            command.value=room.roomMediaCurrentTime;
+            room.roomMediaIsPlaying=true;
+            // playerDefault();
+            break;
+        case 'video_action_play_disable':
+            command.target='player';
+            command.type='video_action_play_disable_sync';
+            // command.value=currentTime;
+            command.value=room.roomMediaCurrentTime;
+            room.roomMediaIsPlaying=false;
+            // playerDefault();
+            break;
+        case 'video_action_play_toggle':
+            playerDefault();
+            break;
+        case 'video_action_seek':
+            if(request.value>0){
+                playerDefault();
+            }
+            break;
+        case 'video_action_volume_mute_enable':
+            playerDefault();
+            break;
+        case 'video_action_volume_mute_disable':
+            playerDefault();
+            break;           
+        case 'video_action_volume_mute_toggle':
+            playerDefault();
+            break;
+        case 'video_action_volume_change':
+            if(request.value>0){
+                playerDefault();
+            }
+        case 'video_action_fullscreen_enable':
+            playerDefault();
+            break;
+        case 'video_action_fullscreen_disable':
+            playerDefault();
+            break;
+        case 'video_action_fullscreen_toggle':
+            playerDefault();
+            break;
+        case 'media_time_update':
+            // const currentTime = request.value;
+            console.log(request.value);
+            room.roomMediaCurrentTime = request.value;
+            // playerDefault();
+            break;
+        case 'page_action_refresh':
+            command.type='page_action_refresh'
+            // playerDefault();
+            break;
+        default:
+            debug('ERROR: UNKOWN REQUEST TYPE:'+request.type);
+            return;
+    }
+    //if type found
+    // socket_request_send(request);
+    switch(command.target){
+        case 'room':
+            io.emit('room_'+request.roomId+'_room', command);
+            break;
+        case 'player':
+            // socket.emit('room_'+request.roomId+'_player', command);
+            // console.log(socket.handshake.issued);
+            io.emit('room_'+request.roomId+'_player', command);
+            break;
+        case 'chat':
+            io.emit('room_'+request.roomId+'_chat', command);
+            break;
+        case 'all':
+            io.emit('all', command);
+            break;
+        default:
+            // socket.emit('room_'+request.roomId+'_room', command);
+    }
+}
 
 const server_socket_init=()=>{
     debug('INITIALIZING SOCKETS');
-    //@SOCKET SETUP
-    const io = require("socket.io")(server, {
-        timeout:50000,
-        reconnection:true,
-        reconnectionDelay: 30000,
-        reconnectionDelayMax: 10000,
-        reconnectionAttempts: 10,
-        autoConnect: false,
-        cors: {
-            origin: '*',
-        }
-    });
-    instrument(io, {
-        auth: false
-    });
+    // //@SOCKET SETUP
+    // const io = require("socket.io")(server, {
+    //     timeout:50000,
+    //     reconnection:true,
+    //     reconnectionDelay: 30000,
+    //     reconnectionDelayMax: 10000,
+    //     reconnectionAttempts: 10,
+    //     autoConnect: false,
+    //     cors: {
+    //         origin: '*',
+    //     }
+    // });
+    // instrument(io, {
+    //     auth: false
+    // });
     //@SOCKET_EVENT_HANDLER
     // ON CONNECT
     try{
@@ -1139,94 +1307,11 @@ const server_socket_init=()=>{
                 } else {
                     console.log(request);
                 }
-
-                const command = {
-                    roomId : request.roomId,
-                    target : '', //player / chat 
-                    type: '',
-                    value : '',
-                    timeStamp: date = new Date().getTime(),
-                }
-                function roomDefault(){
-                    command.target='room';
-                    command.type=request.type;
-                    command.value=request.value;
-                }
-                function playerDefault(){
-                    command.target='player';
-                    command.type=request.type;
-                    command.value=request.value;
-                }
-                function chatDefault(){
-                    command.target='player';
-                    command.type=request.type;
-                    command.value=request.value;
-                }
-                switch(request.type){
-                    case 'video_action_play_enable':
-                        playerDefault();
-                        break;
-                    case 'video_action_play_disable':
-                        playerDefault();
-                        break;
-                    case 'video_action_play_toggle':
-                        playerDefault();
-                        break;
-                    case 'video_action_seek':
-                        if(request.value>0){
-                            playerDefault();
-                        }
-                        break;
-                    case 'video_action_volume_mute_enable':
-                        playerDefault();
-                        break;
-                    case 'video_action_volume_mute_disable':
-                        playerDefault();
-                        break;           
-                    case 'video_action_volume_mute_toggle':
-                        playerDefault();
-                        break;
-                    case 'video_action_volume_change':
-                        if(request.value>0){
-                            playerDefault();
-                        }
-                    case 'video_action_fullscreen_enable':
-                        playerDefault();
-                        break;
-                    case 'video_action_fullscreen_disable':
-                        playerDefault();
-                        break;
-                    case 'video_action_fullscreen_toggle':
-                        playerDefault();
-                        break;
-                    case 'media_time_update':
-                        const currentTime = request.value;
-                        console.log(currentTime);
-                        // playerDefault();
-                        break;
-                    default:
-                        debug('ERROR: UNKOWN REQUEST TYPE:'+request.type);
-                        return;
-                }
-                //if type found
-                // socket_request_send(request);
-                switch(command.target){
-                    case 'room':
-                        socket.emit('room_'+request.roomId+'_room', command);
-                        break;
-                    case 'player':
-                        // socket.emit('room_'+request.roomId+'_player', command);
-                        // console.log(socket.handshake.issued);
-                        io.emit('room_'+request.roomId+'_player', command);
-                        break;
-                    case 'chat':
-                        socket.emit('room_'+request.roomId+'_chat', command);
-                        break;
-                    default:
-                        // socket.emit('room_'+request.roomId+'_room', command);
-                }
+                server_socket_command(request);
             }
         );
+
+
 //REQUEST////////////////////////////////////////////////////////////////////////////////////////////
 
         //TEST EMIT
