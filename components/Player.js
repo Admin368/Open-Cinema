@@ -24,7 +24,7 @@ import { StoreProvider, Provider } from 'easy-peasy';
 function debug(msg){
     // console.log(`${debug.caller.name}()=>${msg}`);
     // console.log(`()=>${msg}`);
-    if(msg.search("FAILURE")==12){
+    if(msg.search("FAILURE"||'ERROR')==12){
         message.error(msg);
     } else if(msg.search("SUCCESS")==12){
         message.success(msg);
@@ -45,11 +45,43 @@ function util_convertHMS(value) {
 import {socket_request_send} from '../room/room_sockets.js';
 import {io, socket} from '../room/room_sockets.js';
 
+function cookies_setUserInfo(key, value){
+    const template ={
+        userIsAdmin:'',
+        userToken:'',
+    }
+    try{
+        cookie.save(key, value, { path: '/' });
+    } catch {
+        debug('ERROR: failed to cookies_setUserInfo key:'+key+' value:'+value);
+    }
+}
+function cookies_getUserInfo(key){
+    // console.log('key:'+key);
+    try{
+        const value = cookie.load(key);
+        // console.log('value:'+value);
+        switch(value){
+            case 'true':
+                return true;
+                break;
+            case 'false':
+                return false;
+            default:
+                return value;
+        }
+        // return value;
+    } catch {
+        debug('ERROR: failed to cookies_getUserIsAdmin:'+key);
+    }
+}
+
 function room_request_external(request, isAdmin){
     console.log(request);
     console.log('External_isAdmin'+isAdmin);
 }
 const Player=(props)=> {
+    const router = useRouter();
     const [videoUrl, setVideoUrl] = useState(); 
     const [videoPoster, setVideoPoster] = useState('');
     const [videoVolume, setVideoVolume] = useState(0.5);
@@ -84,7 +116,6 @@ const Player=(props)=> {
     const userIsAdmin = useStoreState((state) => state.userIsAdmin);
     // const [userIsAdmin, setUserIsAdmin] = useState(false);
     const [userIsAdminLocal, setUserIsAdminLocal] = useState(false);
-    // useEffect(()=>{},userSocketId)
     const [userToken, setUserToken] = useState('userToken0');
     const [userName, setUserName] = useState('username0');
     const [userSocketId, setUserSocketId] = useState('');
@@ -365,7 +396,7 @@ const player_event_handle_timeupdate=()=>{
             type:'media_time_update',
             value:currentTime,
         }
-        // room_request(request);   
+        room_request(request);   
         // if(!isSeeking){
         //     debug('seek Allowed'+isSeeking);
         //     setControlsSeekValue(currentTime);
@@ -542,22 +573,7 @@ function player_event_handle_waiting(){
     }
 
 //ROOM_REQUESTS ////////////////////////////////////////////////////////////
-useEffect(()=>{
-    // const isAdmin = cookies.userIsAdmin;
-    // console.log('userIsAdmin:'+isAdmin);
-    // setCookie('userIsAdmin',userIsAdmin);
-    cookie.save('userIsAdmin', userIsAdmin, { path: '/' });
-    // const roomFn_new=(data)=>{
-    //     const isAdminFn = isAdmin;
-    //     console.log('isAdminFn:'+isAdminFn+' data:'+data);
-    // }
-    // console.log('isAdmin:'+userIsAdmin);
-    // setRoomFn(()=>x=>console.log('user:'+x+'IsAdmin:'+userIsAdmin));
-},[userIsAdmin]);
 
-// useEffect(()=>{
-//     console.log('cookie changed');
-// },[cookies])
 
 const room_request_=async(request)=>{
     setUserIsAdminLocal((state)=>state);
@@ -565,10 +581,10 @@ const room_request_=async(request)=>{
 }
 const room_request=async(request)=>{
     // setUserIsAdminLocal((state)=>state);
-    const isAdmin = cookie.load('userIsAdmin');
-    console.log('cooker_IsUserAdmin:'+isAdmin);
+    const isAdmin = cookies_getUserInfo('userIsAdmin');
+    // console.log('cooker_IsUserAdmin:'+isAdmin);
     // const isAdmin = userIsAdmin;
-    roomFn('paulo');
+    // roomFn('paulo');
     // console.log('userIsAdmin:'+userIsAdmin+' room_request_userIsAdmin:'+isAdmin);
     // console.log('room_request_userIsAdmin:'+isAdmin);
  
@@ -590,7 +606,7 @@ const room_request=async(request)=>{
             return;
         }
     if(isAdmin){
-        console.log('isAdmin')
+        // console.log('isAdmin');
     // ONLY PLACE VIDEO ACTIONS ARE REQUESTED
         request.type = request.type||'';
         request.value = request.value||0;
@@ -607,23 +623,26 @@ const room_request=async(request)=>{
 
         socket_request_send(request);
     } else {
-        console.log('NOT ADMIN');
+        debug('ERROR: REQUEST DENIED - NOT ADMIN');
     }
 }
 
 //ROOM_EVENTS /////////////////////////////////////////////////////////////
 // ONLY PLACE VIDEO ACTIONS ARE CALLED
+socket.on('recone')
 socket.off(`room_0_player`);
 socket.on(`room_0_player`,async(command)=>{
     // console.log('lastCommandTimeStamp'+lastCommandTimeStamp);
-    if(command.timeStamp!==lastCommandTimeStamp){
-        await store_setState({
-            state:'lastCommandTimeStamp',
-            value:command.timeStamp,
-        });
-        console.log(command);
-        room_command_video_action(command);
-    }
+    room_command_video_action(command);
+
+    // if(command.timeStamp!==lastCommandTimeStamp){
+    //     await store_setState({
+    //         state:'lastCommandTimeStamp',
+    //         value:command.timeStamp,
+    //     });
+    //     console.log(command);
+    //     room_command_video_action(command);
+    // }
 });
 function room_command_video_action(request){
     switch(request.type){
@@ -663,6 +682,9 @@ function room_command_video_action(request){
         case 'video_action_fullscreen_toggle':
             video_action_fullscreen_toggle();
             break;
+        case 'page_action_refresh':
+            router.reload();
+            break;
         default:
             debug('ERROR: UNKOWN COMMAND:'+request.type);
             return;
@@ -670,32 +692,21 @@ function room_command_video_action(request){
     //if type found
     // socket_request_send(request);
 }
-
-
-const removeEvents=(elem)=>{
-    elem.current.replaceWith(elem.current.cloneNode(true));
-}
-const removeAllEvents=()=>{
-    const elements = [
-        // video,
-        // video_container,
-        // controls_prev,
-        // controls_play,
-        // controls_next,
-        controls_mute,
-        // controls_volume,
-        // controls_time,
-        // controls_seek,
-        // // controls_seeker,
-        // controls_chat,
-        // controls_fullScreen,
-    ];
-    elements.map((element)=>{
-        removeEvents(element);
-    });
-}
+    //USE_EFFECT - ON ADMIN CHANGE
     useEffect(()=>{
-// removeAllEvents();
+        cookies_setUserInfo('userIsAdmin', userIsAdmin);
+    },[userIsAdmin]);
+
+    //USE_EFFECT - ON MEDIA CHANGE
+    useEffect(()=>{
+        const mediaUrl = props.mediaUrl;
+        console.log('New mediaUrl:'+mediaUrl);
+        if(mediaUrl){
+            setVideoUrl(mediaUrl);
+        }
+    },[props.mediaUrl]);
+
+    useEffect(()=>{
 //CONTROLS_PREV ////////////////////////////////////////////////////////////
 controls_prev.current.addEventListener('click',()=>{
     debug('CONTROLS_PREV - EVENT - CLICK');
@@ -813,17 +824,7 @@ video.current.addEventListener('click',()=>{
         visibility:userIsAdmin===true?'visible':'hidden',
     }
     //MEDIAURL-EVENT-CHANGE
-    useEffect(()=>{
-        const mediaUrl = props.mediaUrl;
-        console.log('New mediaUrl:'+mediaUrl);
-        if(mediaUrl){
-            setVideoUrl(mediaUrl);
-        }
-    },[props.mediaUrl]);
-    // useEffect(()=>{
-    //     console.log('ADMIN PRIVILAGES CHANGE');
-    //     setUserIsAdminLocal(userIsAdmin);
-    // },[userIsAdmin]);
+
     return(
         <div
             ref={video_container}
@@ -834,7 +835,7 @@ video.current.addEventListener('click',()=>{
             >
                 {userIsAdmin===true?<span> Admin {userIsAdmin} </span>:null}
                 <button ref={controls_prev} style={style_controls_admin}>prev</button>
-                <button ref={controls_play} style={style_controls_admin}>play</button>
+                <button ref={controls_play} style={style_controls_admin}>{!videoIsPlaying?'play':'pause'}</button>
                 <button ref={controls_next} style={style_controls_admin}>next</button>
                 <button ref={controls_mute} >mute</button>
                 <button ref={controls_volume} >volume</button>
