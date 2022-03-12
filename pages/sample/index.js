@@ -4,7 +4,7 @@ import AppLayout from "../../components/AppLayout";
 
 import './style.less';
 
-const backup = props => {
+const index = props => {
   return (
     <AppLayout>
       <div className="text">Sample Page</div>
@@ -12,4 +12,4 @@ const backup = props => {
   );
 };
 
-export default backup;
+export default index;
