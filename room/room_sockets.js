@@ -1,7 +1,8 @@
 //SOCKET
 import io from 'Socket.IO-client';
 import axios from 'axios';
-export const serverUrl = 'http://localhost:3000';
+import {cookies_setUserInfo, cookies_getUserInfo} from '../storage/storage.js';
+export const serverUrl = 'http://192.168.1.107:3000';
 export const socket = io(serverUrl, {
     reconnectionDelayMax: 10000,
 });
