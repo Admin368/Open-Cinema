@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Alert } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { render } from "less";
@@ -85,7 +85,9 @@ function util_convertHMS(value) {
 const Player=(props)=> {
     const router = useRouter();
     const [goldernDelay, setGoldenDelay] = useState(2000); //milliseconds for sync waiting
-    const [videoUrl, setVideoUrl] = useState(); 
+    // const [videoUrl, setVideoUrl] = useState(); 
+    const videoUrl = useStoreState((state) => state.videoUrl);
+
     const [videoPoster, setVideoPoster] = useState('');
     const [videoVolume, setVideoVolume] = useState(0.5);
     const [videoCurrentTime, setVideoCurrentTime] = useState(0);
@@ -121,9 +123,12 @@ const Player=(props)=> {
     const [userIsAdminLocal, setUserIsAdminLocal] = useState(false);
     const [userToken, setUserToken] = useState('userToken0');
     const [userName, setUserName] = useState('username0');
-    const [userSocketId, setUserSocketId] = useState('');
+    // const [userSocketId, setUserSocketId] = useState('');
+    const userSocketId = useStoreState((state) => state.userSocketId);
+
     // const [roomId, setRoomId] = useState(0);
     const roomId = useStoreState((state) => state.roomId);
+    const [roomIsJoined, setRoomIsJoined] = useState(false);
 
     const [isOnlySync, setIsOnlineSync] = useState(false);
     const roomIsConnected = useStoreState((state) => state.roomIsConnected);
@@ -606,6 +611,7 @@ const room_request=async(request)=>{
         //     debug('dont update paused');
         //     return;
         // }
+    // if(isAdmin){
     if(isAdmin){
     // ONLY PLACE VIDEO ACTIONS ARE REQUESTED
         request.type = request.type||'';
@@ -623,7 +629,32 @@ const room_request=async(request)=>{
 
         socket_request_send(request);
     } else {
-        debug('ERROR: REQUEST DENIED - NOT ADMIN');
+        // ALLOWED REQUESTS
+        if(
+            request.type==='room_joined'||
+            request.type==='media_request'
+        ){
+            console.log('allowed request');
+            console.log(request);
+
+            request.type = request.type||'';
+            request.value = request.value||0;
+            request.password = request.username||'';
+            request.message = request.message||'';
+    
+            // request.userToken = userToken||'';
+            // request.userIsAdmin = userIsAdmin||'';//validate with socketId
+            // request.userName = userName||'';
+            // // request.userSocketId = userSocketId||'';
+            // request.roomId = roomId||0;
+            socket_request_send(request);
+        }else{
+            if(!request.type==='media_time_update'){
+                console.log('ERROR: REQUEST DENIED - NOT ADMIN');
+                debug('ERROR: REQUEST DENIED - NOT ADMIN');
+                console.log(request);
+            }  
+        }
     }
 }
 
@@ -632,12 +663,80 @@ const room_request=async(request)=>{
 socket.off(`room_0_player`);
 socket.on(`all`,async(command)=>{room_command_video_action(command);});
 socket.on(`room_0_player`,async(command)=>{room_command_video_action(command);});
+// socket.on(`socket_${socket.id}`,async(command)=>{room_command_video_action(command);});
+// socket.off('connect');
+// socket.on(`socket_${userSocketId}`,async(command)=>{room_command_video_action(command);});
 
+socket.io.on('reconnect',()=>{
+    console.log('reconnect1 socketId:'+socket.id);
+});
+socket.on('reconnect',()=>{
+    console.log('reconnect2 socketId:'+socket.id);
+});
+socket.off('connect');
+socket.on('connect',()=>{
+    const socketId = socket.id;
+    const currentSocketId = cookies_getUserInfo('socketId');
+    const isSocketConnected  = socket.connected;
+    // setUserSocketId(state=>state);
+    if(isSocketConnected){
+        // SOCKET CONNECTED
+        // console.log('socketId:'+socket.id+' currentSocketId:'+currentSocketId);
+        if(currentSocketId!==socketId){
+            // console.log('mySocket:'+socketId);
+            console.log('CONNECTED! -> mySocket:'+socketId);
+            const topic= `socket_${socketId}`;
+            socket.off(topic);
+            socket.on(topic,async(command)=>{room_command_video_action(command);});
 
-
+            cookies_setUserInfo('socketId',socketId);
+            store_setState({
+                state:'userSocketId',
+                value:socketId,
+            });
+            room_request({
+                type:'room_joined',
+            });
+            room_request({
+                type:'media_request',
+            });
+            // setUserSocketId(socketId);
+        }
+    }else if(!isSocketConnected){
+        // SOCKET DISCONNECTED
+    }
+    
+});
+useEffect(()=>{
+    
+},[]);
 function room_command_video_action(request){
     try{
         switch(request.type){
+            case 'room_joined':
+                // const {roomId, roomMediaUrl} = request;
+                if(!roomIsJoined){
+                    setRoomIsJoined(true);
+                    console.log('room_joined:');
+                    console.log(request);
+                }
+                break;  
+            case 'media_request':
+                // const {roomId, roomMediaUrl} = request;
+                console.log('mediaInfo_request:');
+                console.log(request);
+                store_setState({
+                    state:'videoUrl',
+                    value: request.value.roomMediaUrl,
+                });
+                video_action_seek(request.value.roomMediaCurrentTime);
+                if(request.value.roomMediaIsPlaying){
+                    video_action_play_enable();
+                    // const sync_play = setTimeout(() => {
+                    //     video_action_play_enable();
+                    // }, goldernDelay);
+                }
+                break;                
             case 'video_action_play_enable':
                 video_action_play_enable();
                 break;
@@ -734,11 +833,12 @@ function room_command_video_action(request){
         const mediaUrl = props.mediaUrl;
         console.log('New mediaUrl:'+mediaUrl);
         if(mediaUrl){
-            setVideoUrl(mediaUrl);
+            // setVideoUrl(mediaUrl);
         }
     },[props.mediaUrl]);
 
     useEffect(()=>{
+        setRoomIsJoined(false);
 //CONTROLS_PREV ////////////////////////////////////////////////////////////
 controls_prev.current.addEventListener('click',()=>{
     debug('CONTROLS_PREV - EVENT - CLICK');
@@ -963,15 +1063,15 @@ video.current.addEventListener('click',()=>{
                     }}
                     width={640}
                     // height={video.current.offsetHeight}
-                    // src={videoUrl}
+                    src={videoUrl}
                     controls={false}
                     // autoPlay
                     // preload="auto"
                     muted
                     // muted={videoVolumeIsMuted}
                 >
-                    <source src={url1}></source>
-                    <source src={url2}></source>
+                    {/* <source src={url1}></source> */}
+                    {/* <source src={url2}></source> */}
                 </video>
             </Spin>
         </div>
