@@ -1,12 +1,13 @@
 # U-byte : openCinema v1 - WatchZXTogether
+
 Watch movies, soccer, , youtube ,videos together sycned with your friends with chat and more
-Current Supported Source:
+Current Supported Source: 
 1. Zxzj legacy links
 
-Planned Supported Source:
-2. Zxzjtv.com new links
-3. video url
-4. youtube
+Planned Supported Source: 
+1. Zxzjtv.com new links
+2. video url
+3. youtube
 
 Demo: TBD
 
