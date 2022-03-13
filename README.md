@@ -1,8 +1,6 @@
-# Next.js App with Ant Design and Less Template
-
-This Next.js template has [Ant Design of React](http://ant.design) preinstalled and preconfigured, with less support.
-
-Demo: [https://next-with-ant-design-less.now.sh/](https://next-with-ant-design-less.now.sh/)
+# openCinema v1 - WatchZXTogether
+Watch movies, soccer, , youtube ,videos together sycned with your friends with chat and more
+Demo: TBD
 
 ## How to use
 
@@ -12,18 +10,18 @@ Demo: [https://next-with-ant-design-less.now.sh/](https://next-with-ant-design-l
 
 3. Run `yarn install`
 
-4. Run `next`
+4. Run `yarn client` to start client
+
+5. Run `yarn server` to start server
 
 ## More info
 
-It's a standard next.js app. Refer to antd docs on component use, setup works out of the box.
-
-Less file is present in `/assets/antd-custom.less`
-
-Ant Design Less theming docs are [here](https://github.com/ant-design/ant-design/blob/master/components/style/themes/default.less).
+Developed by U-byte.cn
 
 ## Pull Requests
 
 PRs are welcome.
 
 Let me know if you encounter any issues.
+
+Open to contributors
