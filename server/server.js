@@ -17,6 +17,9 @@ const { contentType } = require('express/lib/response');
 // const { socket } = require('../room/room_sockets');
 const bcrypt_saltRounds = 10;
 
+const videoUrl1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaaeca.f0.mp4?dis_k=b8bb5e864066b469fc2af0aed9ac81fa&dis_t=1644942290.mp4';
+const videoUrl2 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
+const videoUrl3 = 'https://bbx-video.gtimg.com/daodm_0b53oiaaoaaagaajjtzli5rn24wda5zaab2a.f0.mp4?dis_k=1255a762a350acb3b3e92319b7036ad3&dis_t=1647193575&daodm.com';
 var test = 0;
 var test_hash = 0;
 var test_password ='1234';
@@ -93,6 +96,7 @@ function debug(msg){
 
 //KEY PRESSING
 const readline = require('readline');
+// const { socket } = require('../room/room_sockets');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', (str, key) => {
@@ -617,7 +621,7 @@ const server_user_checkExist=({socketId=null})=>{
     }   
 }
 
-const server_user_create=({socketId=null,userName=null,ipAddress=null})=>{
+const server_user_create=({socketId=null,userName=null,ipAddress=null,})=>{
     if(!server_user_checkExist({socketId})){
         if(socketId==null){debug('ERROR:INVALID PARAM-socketId:'+socketId);return null;}
         users_array.push(
@@ -756,6 +760,7 @@ const server_room_create=({socketId=null,roomId=server_room_generate_uniqueId()}
         new room({
             roomId:roomId,
             roomCreatorSocketId:socketId,
+            roomMediaUrl:videoUrl3,
         })
     );
     // server_room_user_add({roomId,socketId});
@@ -830,6 +835,18 @@ const server_room_user_add=({roomId=null,socketId=null})=>{
             user.userRoomUserIndex = roomUserIndex;
             room.roomUserCount = room.roomUserCount+1;
             room.roomUserCountLog = room.roomUserCountLog+1;
+            // server_socket_command({
+            //     target:'socket',
+            //     type:'room_joined',
+            //     socketId:socketId,
+            // });
+            // setTimeout(() => {
+            //     server_socket_command({
+            //         target:'socket',
+            //         type:'room_joined',
+            //         socketId:socketId,
+            //     });
+            // }, 3000);
         }else{
             debug('ERROR:ROOM NOT FOUND');
         }
@@ -1093,7 +1110,9 @@ const server_socket_command=(
         timeStamp: date = new Date().getTime(),
     }
     )=>{
-    // console.log(request)
+    if(!request.type==='media_time_update'){
+        console.log(request);
+    }
     // const command = {
     //     roomId : request.roomId,
     //     target : '', //player / chat 
@@ -1122,14 +1141,19 @@ const server_socket_command=(
     // const currentTime = request.mediaCurrentTime||0;
     switch(request.type){
         case 'room_joined':
-            command.target='player';
+            command.target='socket';
             command.type='room_joined';
+            // playerDefault();
+            break;
+        case 'media_request':
+            command.target='socket';
+            command.type='media_request';
             command.value={
-                roomMediaUrl:room.roomMediaIsPlaying,
+                socketId:request.userSocketId||null,
+                roomMediaUrl:room.roomMediaUrl,
                 roomMediaIsPlaying:room.roomMediaIsPlaying,
                 roomMediaCurrentTime:room.roomMediaCurrentTime,
             };
-            // playerDefault();
             break;
         case 'video_action_play_enable':
             command.target='player';
@@ -1187,6 +1211,13 @@ const server_socket_command=(
             command.type='page_action_refresh'
             // playerDefault();
             break;
+        case 'media_action_checkDelay':
+            command.value={
+                roomMediaUrl:room.roomMediaIsPlaying,
+                roomMediaIsPlaying:room.roomMediaIsPlaying,
+                roomMediaCurrentTime:room.roomMediaCurrentTime,
+            };
+            break;
         default:
             debug('ERROR: UNKOWN REQUEST TYPE:'+request.type);
             return;
@@ -1207,6 +1238,11 @@ const server_socket_command=(
             break;
         case 'all':
             io.emit('all', command);
+            break;
+        case 'socket':
+            console.log('SOCKET REQUEST for socket_'+request.socketId);
+            // console.log(request.socket);
+            io.emit('socket_'+request.userSocketId, command);
             break;
         default:
             // socket.emit('room_'+request.roomId+'_room', command);
@@ -1246,7 +1282,12 @@ const server_socket_init=()=>{
             // if(isDebuging==true){console.log('NEW USER CONNECTED->id'+socket.id)}
             debug('CONNECTED: NEW USER->id'+socket.id)
             // users_array.push(new user({index:num,userSocketId:socket.id}));
-            server_user_create({socketId,ipAddress});
+            // server_user_create({socketId,ipAddress,socket});
+            console.log('oldSocket:'+socketId);
+            if(!server_user_checkExist({socketId})){
+                console.log('newSocket:'+socketId);
+                server_user_create({socketId,ipAddress,socket});
+            }
             //    users[num].userJoinRoom(0);
             // users_history.push
             //    users_getCount();
