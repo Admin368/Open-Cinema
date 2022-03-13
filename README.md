@@ -19,9 +19,14 @@ Demo: TBD
 
 3. Run `yarn install`
 
-4. Run `yarn client` to start client
+4. Run `yarn server` to start client
 
-5. Run `yarn server` to start server
+5. Run `yarn client` to start server
+
+6. set One user As Admin
+
+7. Admin controls all
+
 
 ## More info
 
