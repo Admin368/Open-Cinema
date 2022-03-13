@@ -72,6 +72,8 @@ function AppComponent(){
   const roomId = useStoreState((state) => state.roomId);
   const roomIsConnected = useStoreState((state) => state.roomIsConnected);
   const store_setState = useStoreActions((actions) => actions.store_setState);
+  const userSocketId = useStoreState((state) => state.userSocketId);
+
 
   const [testId, setTestId] = useState(0);
 
@@ -88,6 +90,10 @@ function AppComponent(){
             if(res.data.videoUrl!=null){
                 message.success('Successfully Got Link');
                 await setMediaUrl(res.data.videoUrl);
+                store_setState({
+                  state:'videoUrl',
+                  value:res.data.videoUrl,
+                })
                 player_play();
             }else{
               message.error('Failed to get Link, check Link Correctly');
@@ -138,6 +144,7 @@ function AppComponent(){
             <span>roomId: {roomId}</span><br/>
             <span>Path:- {router.path}</span><br/>
             <span>asPath:- {router.asPath}</span><br/>
+            <span>userUserId:- {userSocketId}</span><br/>
             <Switch 
                 checkedChildren="isAdmin"
                 unCheckedChildren="notAdmin"
@@ -201,7 +208,7 @@ function AppComponent(){
       console.log('roomId:'+room);
       console.log('isNum:'+isNumeric(room));
       if(isNumeric(room)&&room>=0){
-        console.log('ok');
+        // console.log('ok');
         store_setState({
           state:'roomId',
           value:room,
@@ -221,6 +228,11 @@ function AppComponent(){
     socket.on(`all`,async(command)=>{room_command_page_action(command);});
     socket.on(`socket_${socket.id}`,async(command)=>{room_command_page_action(command);});
     socket.on(`page`,async(command)=>{room_command_page_action(command);});
+    socket.io.on('reconnect',()=>{
+      message.info('Server Restarted')
+      console.log('reconnect1 socketId:'+socket.id);
+      router.reload();
+  });
     function room_command_page_action(request){
       switch(request.type){
         case 'page_action_refresh':
@@ -269,7 +281,7 @@ function AppComponent(){
         Click here to reload
       </button>
       <Player
-        mediaUrl={mediaUrl}
+        // mediaUrl={mediaUrl}
         userIsAdmin={userIsAdmin}
       />
       <Divider />
