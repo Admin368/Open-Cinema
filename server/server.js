@@ -20,6 +20,8 @@ const bcrypt_saltRounds = 10;
 const videoUrl1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaaeca.f0.mp4?dis_k=b8bb5e864066b469fc2af0aed9ac81fa&dis_t=1644942290.mp4';
 const videoUrl2 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 const videoUrl3 = 'https://bbx-video.gtimg.com/daodm_0b53oiaaoaaagaajjtzli5rn24wda5zaab2a.f0.mp4?dis_k=1255a762a350acb3b3e92319b7036ad3&dis_t=1647193575&daodm.com';
+const videoUrl4 = 'https://bbx-video.gtimg.com/daodm_0b5354abeaaawyahitbmffrn336dclxqaesa.f0.mp4?dis_k=25f8cb1a47d24cfeb9c5ed54b55c989e&dis_t=1647233197&daodm.com';
+const videoUrl = '';
 var test = 0;
 var test_hash = 0;
 var test_password ='1234';
@@ -760,7 +762,7 @@ const server_room_create=({socketId=null,roomId=server_room_generate_uniqueId()}
         new room({
             roomId:roomId,
             roomCreatorSocketId:socketId,
-            roomMediaUrl:videoUrl3,
+            roomMediaUrl:videoUrl,
         })
     );
     // server_room_user_add({roomId,socketId});
@@ -1207,6 +1209,25 @@ const server_socket_command=(
             room.roomMediaCurrentTime = request.value;
             // playerDefault();
             break;
+        case 'media_source_update':
+            // const currentTime = request.value;
+            // console.log(request.value);
+            //set room  values
+            room.roomMediaUrl=request.value;
+            room.roomMediaIsPlaying=false;
+            room.roomMediaCurrentTime=0;
+
+            command.target='player';
+            command.type='media_source_update';
+            command.value={
+                // socketId:request.userSocketId||null,
+                roomMediaUrl:room.roomMediaUrl,
+                roomMediaIsPlaying:room.roomMediaIsPlaying,
+                roomMediaCurrentTime:room.roomMediaCurrentTime,
+            };
+            // room.roomMediaCurrentTime = request.value;
+            // playerDefault();
+            break;
         case 'page_action_refresh':
             command.type='page_action_refresh'
             // playerDefault();
@@ -1346,6 +1367,7 @@ const server_socket_init=()=>{
                 ){
 
                 } else {
+                    console.log('NEW REQUEST');
                     console.log(request);
                 }
                 server_socket_command(request);
