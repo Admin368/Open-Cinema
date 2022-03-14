@@ -52,6 +52,8 @@ export const settingsStore = createStore({
     lastCommandTimeStamp:0,
 
     videoUrl:'',
+    videoUrlNew:'',
+    videoUrlNewType:'zxzj',
 
 
     //SETTINGS
