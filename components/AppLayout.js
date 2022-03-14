@@ -196,7 +196,7 @@ const AppLayout = props => {
               textAlign: "center"
             }}
           >
-            Watch -ZX-
+            {'U-BYTE >>>OPEN-CINEMA<<<'}
           </div>
         </Header>
         <Content // you may want to change these
@@ -220,7 +220,7 @@ const AppLayout = props => {
           </div>
         </Content>
         <Footer style={{ ...contentStyleWidth, textAlign: "center" }}>
-          U-byte Devs
+          U-byte Devs and Admin368
           {/* <p>
             width: {window.width}, height: {window.height}
           </p> */}
