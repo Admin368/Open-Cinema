@@ -32,7 +32,7 @@ const url = url2;
 
 import './style.less';
 
-import {io, socket, serverUrl} from '../../room/room_sockets.js';
+import {io, socket, serverUrl, socket_request_send} from '../../room/room_sockets.js';
 
 const userData_Default={
 
@@ -41,7 +41,7 @@ function isNumeric(num){
   return !isNaN(num)
 }
 //STORE
-import {useStoreState, useStoreActions, useStoreRehydrated, useStore} from 'easy-peasy';
+import {useStoreState, useStoreActions, useStoreRehydrated, useStore, debug} from 'easy-peasy';
 import { StoreProvider, Provider } from 'easy-peasy';
 import store_main from '../../stores/store_main.js';
 
@@ -53,6 +53,10 @@ function App() {
     )
 }
 
+const linkTypes = [
+  'zxzj',
+  'url',
+]
 function AppComponent(){
   const router = useRouter();
   const {query} = useRouter();
@@ -63,7 +67,7 @@ function AppComponent(){
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [title, setTitle] = useState('ZX LINK');
-  const [mediaUrl, setMediaUrl] = useState(url3);
+  // const [mediaUrl, setMediaUrl] = useState('');
   // const [roomId, setRoomId] = useState(0);
   const [isDebugging, setIsDebugging] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -74,41 +78,68 @@ function AppComponent(){
   const store_setState = useStoreActions((actions) => actions.store_setState);
   const userSocketId = useStoreState((state) => state.userSocketId);
 
-
+  const videoUrl = useStoreState((state) => state.videoUrl);
+  const videoUrlNew = useStoreState((state) => state.videoUrlNew);
+  const videoUrlNewType = useStoreState((state) => state.videoUrlNewType);
+  
   const [testId, setTestId] = useState(0);
 
   async function linkProcess(){
     if(searchValue!=''){
-    setIsSearching(true);
-    //console.log('setting up Link'+searchValue);
-    message.info('Checking Link');
-      const result = await axios
-        .get('../../api/getLink?link='+searchValue)
-        .then(async(res)=> {
-            //console.log(`statusCode: ${res.status}`)
-            //console.log(res.data)
-            if(res.data.videoUrl!=null){
-                message.success('Successfully Got Link');
-                await setMediaUrl(res.data.videoUrl);
-                store_setState({
-                  state:'videoUrl',
-                  value:res.data.videoUrl,
-                })
-                player_play();
-            }else{
-              message.error('Failed to get Link, check Link Correctly');
-
-            }
-        })
-        .catch(error => {
-            console.error(error)
-        })
-      // console.log(result);
-      // 
-    setIsSearching(false);
+      const request = {
+        type:'',
+        value:'',
+      }
+      switch(videoUrlNewType){
+        case 'zxzj':
+          await linkGet();
+          return;
+          break;
+        case 'url':
+          request.type='media_source_update';
+          request.value=searchValue;
+          break;
+        default:
+          console.log('UNKNOWN LINK TYPE:'+videoUrlNewType);
+          return;
+          break;
+      }
+      if(request.type!=null){
+        socket_request_send(request);
+      }else{
+        console.log('ERROR: No link type');
+      }
     }else{
       message.error('Please Enter Link')
     }
+  }
+  async function linkGet(){
+    setIsSearching(true);
+    message.info('Checking Link');
+    const result = await axios
+      .get('../../api/getLink?link='+searchValue)
+      .then(async(res)=> {
+          //console.log(`statusCode: ${res.status}`)
+          // console.log(res.data);
+          if(res.data.videoUrl!=null){
+              message.success('Successfully Got Link');
+              // await setMediaUrl(res.data.videoUrl);
+              const request={
+                type:'media_source_update',
+                value:res.data.videoUrl,
+              }
+              //check if new zxzjlink
+              //check if link playeable
+              socket_request_send(request);
+          }else{
+            message.error('Failed to get Link, check Link Correctly');
+
+          }
+      })
+      .catch(error => {
+          console.error(error)
+      });
+    setIsSearching(false);
   }
 
   const DebuggerDiv=()=>{
@@ -119,7 +150,7 @@ function AppComponent(){
           className="debuggerDiv" 
           style={{
             position:'fixed',
-            top:posY,
+            bottom:posY,
             left:posX,
             zIndex:1000,
             backgroundColor:'grey',
@@ -145,6 +176,7 @@ function AppComponent(){
             <span>Path:- {router.path}</span><br/>
             <span>asPath:- {router.asPath}</span><br/>
             <span>userUserId:- {userSocketId}</span><br/>
+            <span>videoUrlNew:- {videoUrlNew.link}</span><br/>
             <Switch 
                 checkedChildren="isAdmin"
                 unCheckedChildren="notAdmin"
@@ -260,6 +292,7 @@ function AppComponent(){
       <DebuggerDiv/>
       <Search 
         ref={search}
+        // addonBefore='https://'
         disabled={!userIsAdmin}
         placeholder="Enter A zxzj Link here Below"
         // value={searchValue}
@@ -277,9 +310,9 @@ function AppComponent(){
           // bottom:0,
         }}
       />
-      <button type="button" onClick={() => router.reload()}>
+      {/* <button type="button" onClick={() => router.reload()}>
         Click here to reload
-      </button>
+      </button> */}
       <Player
         // mediaUrl={mediaUrl}
         userIsAdmin={userIsAdmin}
