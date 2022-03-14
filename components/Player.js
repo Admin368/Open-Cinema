@@ -87,6 +87,8 @@ const Player=(props)=> {
     const [goldernDelay, setGoldenDelay] = useState(2000); //milliseconds for sync waiting
     // const [videoUrl, setVideoUrl] = useState(); 
     const videoUrl = useStoreState((state) => state.videoUrl);
+    const videoUrlNew = useStoreState((state) => state.videoUrlNew);
+    const videoUrlNewType = useStoreState((state) => state.videoUrlType);
 
     const [videoPoster, setVideoPoster] = useState('');
     const [videoVolume, setVideoVolume] = useState(0.5);
@@ -247,6 +249,7 @@ function player_event_handle_error(){
         setVideoIsError(true);
         setVideoIsBuffering(false);
         debug(`FAILURE:${message}`);
+        message.error('VIDEO ERROR!');
     }catch{
         debug(`FAILURE:${message}`);
     }
@@ -707,9 +710,6 @@ socket.on('connect',()=>{
     }
     
 });
-useEffect(()=>{
-    
-},[]);
 function room_command_video_action(request){
     try{
         switch(request.type){
@@ -723,7 +723,7 @@ function room_command_video_action(request){
                 break;  
             case 'media_request':
                 // const {roomId, roomMediaUrl} = request;
-                console.log('mediaInfo_request:');
+                console.log('media_request:');
                 console.log(request);
                 store_setState({
                     state:'videoUrl',
@@ -736,7 +736,18 @@ function room_command_video_action(request){
                     //     video_action_play_enable();
                     // }, goldernDelay);
                 }
-                break;                
+                break;
+            case 'media_source_update':
+                message.success('Admin Changed The Video Link');
+                console.log('media_source_change:');
+                console.log(request);
+                store_setState({
+                    state:'videoUrl',
+                    value: request.value.roomMediaUrl,
+                });
+                video_action_seek(request.value.roomMediaCurrentTime);
+                video_action_play_disable();
+                break;      
             case 'video_action_play_enable':
                 video_action_play_enable();
                 break;
@@ -823,6 +834,22 @@ function room_command_video_action(request){
     //if type found
     // socket_request_send(request);
 }
+    //USE_EFFECT - ON videoUrlNew CHANGE
+    // useEffect(()=>{
+    //     console.log('effect on videoUrlNew')
+    //     const videoUrlNew_ = videoUrlNew.link;
+    //     const videoUrlNewType_ =  videoUrlNew.type;
+    //     //check it
+    //     //cleanIt
+    //     room_request({
+    //         type:'media_source_update',
+    //         value:{
+    //             videoUrlNew:videoUrlNew_,
+    //             videoUrlNewType:videoUrlNewType_,
+    //         }
+    //     });
+    // },[videoUrlNew]);
+
     //USE_EFFECT - ON ADMIN CHANGE
     useEffect(()=>{
         cookies_setUserInfo('userIsAdmin', userIsAdmin);
