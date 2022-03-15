@@ -2,9 +2,9 @@
   "name": "watchzxtogether",
   "version": "1.0.0",
   "scripts": {
-    "api": "node ./api2/api2.js",
-    "client": "next -p 3001",
-    "server": "node ./server/server.js",
+    "client": "next -p 3000",
+    "api": "node ./servers/server_api.js",
+    "server": "node ./servers/server_sockets.js",
     "build": "next build"
   },
   "dependencies": {
