@@ -12,10 +12,13 @@ import {
   Button,
   Divider,
   Input,
+  Select,
   Switch,
   Space,
   message,
   InputNumber,
+  Row,
+  Col,
 } from 'antd';
 const { Search } = Input;
 
@@ -32,7 +35,7 @@ const url = url2;
 
 import './style.less';
 
-import {io, socket, serverUrl, socket_request_send} from '../../room/room_sockets.js';
+import {io, socket, hostUrl, socket_request_send} from '../../room/room_sockets.js';
 
 const userData_Default={
 
@@ -54,8 +57,15 @@ function App() {
 }
 
 const linkTypes = [
-  'zxzj',
-  'url',
+  {
+    value:'zxzj',
+    key:0
+  },
+  {
+    value:'url',
+    key:1
+  },
+
 ]
 function AppComponent(){
   const router = useRouter();
@@ -117,31 +127,86 @@ function AppComponent(){
     setIsSearching(true);
     message.info('Checking Link');
     const result = await axios
-      .get('../../api/getLink?link='+searchValue)
+      // .get('../../api/getLink?link='+searchValue)
+      .get(hostUrl+':3002/api/zxzj?link='+searchValue)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
           if(res.data.videoUrl!=null){
-              message.success('Successfully Got Link');
               // await setMediaUrl(res.data.videoUrl);
-              const request={
-                type:'media_source_update',
-                value:res.data.videoUrl,
+              const link=res.data.videoUrl;
+              if(link.search('http')==0){
+                message.success('Successfully Got Link');
+                const request={
+                  type:'media_source_update',
+                  value:link,
+                }
+                socket_request_send(request);
+              }else{
+                // message.error('BAD LINK - MAYBE NEW ZXZJ LINKS:');
+                
+                //NEW PATTANE
+                // message.info('TRYING NEW ZXZJ PATTERN');
+                // const newLink = 'https://bbx-video.gtimg.com/'+link+'.f0.mp4?dis_k=&dis_t=1647285485&daodm.com';
+                // const request={
+                //   type:'media_source_update',
+                //   value:newLink,
+                // }
+                // socket_request_send(request);
+                //NEW ALGO
+                message.error('TRYING NEW ZXZJ ALGO');
+                console.log('badLink:'+link);
+                const ckPlayer= 'https://www.zxzjtv.com/ckplayer.php?url=';
+                const newLink=ckPlayer+link;
+                setTimeout(async() => {
+                  await linkGet_zxzj_new(newLink);
+                }, 2000);
+                return;
               }
               //check if new zxzjlink
               //check if link playeable
-              socket_request_send(request);
           }else{
             message.error('Failed to get Link, check Link Correctly');
 
           }
       })
       .catch(error => {
-          console.error(error)
+          console.log(error);
       });
     setIsSearching(false);
   }
-
+  async function linkGet_zxzj_new(url){
+    setIsSearching(true);
+    message.info('TRYING NEW ZXZJ ALGO');
+    console.log('NEW ZXZJ ALGO TRYING: '+url);
+    const result = await axios
+      // .get('../../api/getLink_zxzj_new?link='+url)
+      .get(hostUrl+':3002/api/zxzj2?link='+url)
+      .then(async(res)=> {
+          //console.log(`statusCode: ${res.status}`)
+          // console.log(res.data);
+          if(res.data.videoUrl!=null){
+              // await setMediaUrl(res.data.videoUrl);
+              const link=res.data.videoUrl;
+              if(link.search('http')==0){
+              message.success('Successfully Got Link');
+                const request={
+                  type:'media_source_update',
+                  value:link,
+                }
+                socket_request_send(request);
+              }else{
+                message.error('BAD LINK2 NEW ZXZJ ALSO FAILED:');
+              }
+          }else{
+            message.error('Failed to get Link2, check Link Correctly');
+          }
+      })
+      .catch(error => {
+          console.log(error);
+      });
+    setIsSearching(false);
+  }
   const DebuggerDiv=()=>{
     const [posX , setPosX] = useState(0);
     const [posY , setPosY] = useState(0);
@@ -233,6 +298,59 @@ function AppComponent(){
     //console.log(parcel);
     socket.emit('room_'+roomId, parcel);
   }
+  const MediaSearch=()=>{
+    return(
+      <Search 
+        ref={search}
+        // addonBefore={<MediaTypeSelector/>}
+        disabled={!userIsAdmin}
+        placeholder="Enter A zxzj Link here Below"
+        // value={searchValue}
+        onChange={()=>{
+          // console.log(search);
+          setSearchValue(search.current.input.input.value);
+        }}
+        enterButton="Search" 
+        size="large" 
+        loading={isSearching} 
+        onPressEnter={linkProcess}
+        onSearch={linkProcess}
+        stye={{
+          // position:'fixed',
+          // bottom:0,
+        }}
+      />
+    );
+  }
+  const MediaTypeSelector=()=>{
+    return(
+      <Row style={{
+        // width:'400px'
+      }}>
+        <Col span={12} style={{textJustify:'center'}}>Type:</Col>
+        <Col span={12}>
+          <Select 
+            // addonBefore='asas'
+            size="large" 
+            disabled={!userIsAdmin}
+
+            // defaultValue=""
+            value={videoUrlNewType}
+            style={{
+              width:100,
+              // textJustify:'center',
+              // display:'flex'
+            }}
+          >
+            {linkTypes.map((type)=>(
+              <Select.Option key={type.key} value={type.value} >{type.value}</Select.Option>
+            ))}
+          </Select>
+        </Col>
+      </Row>
+        
+    );
+  }
   useEffect(()=>{
     //GET ROOOM
     const {room} = query;
@@ -290,29 +408,7 @@ function AppComponent(){
   return(
     <AppLayout>
       <DebuggerDiv/>
-      <Search 
-        ref={search}
-        // addonBefore='https://'
-        disabled={!userIsAdmin}
-        placeholder="Enter A zxzj Link here Below"
-        // value={searchValue}
-        onChange={()=>{
-          // console.log(search);
-          setSearchValue(search.current.input.input.value);
-        }}
-        enterButton="Search" 
-        size="large" 
-        loading={isSearching} 
-        onPressEnter={linkProcess}
-        onSearch={linkProcess}
-        stye={{
-          // position:'fixed',
-          // bottom:0,
-        }}
-      />
-      {/* <button type="button" onClick={() => router.reload()}>
-        Click here to reload
-      </button> */}
+      <MediaSearch/>
       <Player
         // mediaUrl={mediaUrl}
         userIsAdmin={userIsAdmin}
