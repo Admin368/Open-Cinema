@@ -1,2 +1,20 @@
 sample test link
 https://www.zxzjtv.com/video/3581-1-1.html
+
+//from s1e1
+https://www.zxzjtv.com/ckplayer.php?url=daodm_0b5354abeaaawyahitbmffrn336dclxqaesa
+https://bbx-video.gtimg.com/daodm_0b5354abeaaawyahitbmffrn336dclxqaesa.f0.mp4?dis_k=ee0a50d296bb399f6173c3c4a1794c69&dis_t=1647284884&daodm.com
+//from s1e2
+https://www.zxzjtv.com/ckplayer.php?url=daodm_0b53n4aaiaaai4alrgqulrrn236darxqabca
+https://bbx-video.gtimg.com/daodm_0b53n4aaiaaai4alrgqulrrn236darxqabca.f0.mp4?dis_k=a6fd992cb3fdc33195a1ad23871f50c3&dis_t=1647285485&daodm.com
+https://bbx-video.gtimg.com/daodm_0b53n4aaiaaai4alrgqulrrn236darxqabca.f0.mp4?dis_k=&dis_t=1647285485&daodm.com
+
+//peaky s1e1
+https://www.zxzjtv.com/video/3698-1-1.html
+daodm_0b53fmaawaaacuapzeq4knrn2k6dbmvqac2a
+https://www.zxzjtv.com/ckplayer.php?url=daodm_0b53fmaawaaacuapzeq4knrn2k6dbmvqac2a&next=/video/3698-1-2.html&id=undefined&nid=undefined
+https://bbx-video.gtimg.com/daodm_0b53fmaawaaacuapzeq4knrn2k6dbmvqac2a.f0.mp4?dis_k=58039e2fba87f64d60e0fb60c534a459&dis_t=1647285895&daodm.com
+
+
+api2
+http://localhost:3002/api2?link=https://www.zxzjtv.com/ckplayer.php?url=daodm_0b53huadwaaagqaemtbqgfrn2podhm6qao2a
