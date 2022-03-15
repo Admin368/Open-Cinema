@@ -663,6 +663,9 @@ const room_request=async(request)=>{
 
 //ROOM_EVENTS /////////////////////////////////////////////////////////////
 // ONLY PLACE VIDEO ACTIONS ARE CALLED
+useEffect(()=>{
+
+
 socket.off(`room_0_player`);
 socket.on(`all`,async(command)=>{room_command_video_action(command);});
 socket.on(`room_0_player`,async(command)=>{room_command_video_action(command);});
@@ -710,6 +713,8 @@ socket.on('connect',()=>{
     }
     
 });
+
+},[]);
 function room_command_video_action(request){
     try{
         switch(request.type){
@@ -752,7 +757,7 @@ function room_command_video_action(request){
                 video_action_play_enable();
                 break;
             case 'video_action_play_enable_sync':
-                // message.info('sync_playing');
+                message.info('sync_playing');
                 console.log('seekValue:'+request.value);
                 if(sync_play){clearInterval(sync_pause);}
                 video_action_seek(request.value);
