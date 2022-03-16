@@ -8,7 +8,9 @@ export const hostUrl = 'http://192.168.16.109';// shahe
 // export const serverUrl = 'localhost';// ngrok
 export const port=5001;
 export const socketUrl=hostUrl+':'+port;
-export const socket = io('https://2ae5-152-101-158-174.ngrok.io', {
+// export const socket = io('https://2ae5-152-101-158-174.ngrok.io', {
+// export const socket = io(socketUrl, {
+export const socket = io('https://pacific-badlands-27887.herokuapp.com/', {
     reconnectionDelayMax: 10000,
 });
 // socket.on('room_0_room',(command)=>{
