@@ -664,9 +664,16 @@ const room_request=async(request)=>{
 //ROOM_EVENTS /////////////////////////////////////////////////////////////
 // ONLY PLACE VIDEO ACTIONS ARE CALLED
 useEffect(()=>{
-socket.off(`room_${roomId}_player`);
+    // console.log('ROOM ID'+roomId);
+    socket.off(`room_${roomId}_player`);
+    socket.on(`room_${roomId}_player`,async(command)=>{room_command_video_action(command);});
+    cookies_setUserInfo('roomId',roomId);
+},[roomId]);
+
+
+useEffect(()=>{
+socket.off(`all`);
 socket.on(`all`,async(command)=>{room_command_video_action(command);});
-socket.on(`room_${roomId}_player`,async(command)=>{room_command_video_action(command);});
 // socket.on(`socket_${socket.id}`,async(command)=>{room_command_video_action(command);});
 // socket.off('connect');
 // socket.on(`socket_${userSocketId}`,async(command)=>{room_command_video_action(command);});
@@ -677,6 +684,7 @@ socket.io.on('reconnect',()=>{
 socket.on('reconnect',()=>{
     console.log('reconnect2 socketId:'+socket.id);
 });
+
 socket.off('connect');
 socket.on('connect',()=>{
     const socketId = socket.id;
@@ -701,9 +709,9 @@ socket.on('connect',()=>{
             room_request({
                 type:'room_joined',
             });
-            room_request({
-                type:'media_request',
-            });
+            // room_request({
+            //     type:'media_request',
+            // });
             // setUserSocketId(socketId);
         }
     }else if(!isSocketConnected){
@@ -722,6 +730,9 @@ function room_command_video_action(request){
                     setRoomIsJoined(true);
                     console.log('room_joined:');
                     console.log(request);
+                    room_request({
+                        type:'media_request',
+                    });
                 }
                 break;  
             case 'media_request':

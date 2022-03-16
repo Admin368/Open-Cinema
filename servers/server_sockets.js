@@ -1102,6 +1102,7 @@ app.get('/request', (req, res) => {
 //@API_FUNCTIONS
 
 const server_socket_command=(
+
     request,
     command = {
         // ...request
@@ -1112,6 +1113,7 @@ const server_socket_command=(
         timeStamp: date = new Date().getTime(),
     }
     )=>{
+try{
     if(!request.type==='media_time_update'){
         console.log(request);
     }
@@ -1268,6 +1270,10 @@ const server_socket_command=(
         default:
             // socket.emit('room_'+request.roomId+'_room', command);
     }
+}catch(error){
+    console.log('ERROR: server_socket_command FAILURE:');
+    console.log(error);
+}
 }
 
 const server_socket_init=()=>{

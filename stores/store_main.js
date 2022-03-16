@@ -39,7 +39,7 @@ export const settingsStore = createStore({
     settingBeingChanged:'default',
     dummy:'',
 
-    roomId:0,
+    roomId:'',
     roomIsConnected:false,
     userIsAdmin:false,
     userToken:'userToken0',
