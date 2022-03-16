@@ -664,11 +664,9 @@ const room_request=async(request)=>{
 //ROOM_EVENTS /////////////////////////////////////////////////////////////
 // ONLY PLACE VIDEO ACTIONS ARE CALLED
 useEffect(()=>{
-
-
-socket.off(`room_0_player`);
+socket.off(`room_${roomId}_player`);
 socket.on(`all`,async(command)=>{room_command_video_action(command);});
-socket.on(`room_0_player`,async(command)=>{room_command_video_action(command);});
+socket.on(`room_${roomId}_player`,async(command)=>{room_command_video_action(command);});
 // socket.on(`socket_${socket.id}`,async(command)=>{room_command_video_action(command);});
 // socket.off('connect');
 // socket.on(`socket_${userSocketId}`,async(command)=>{room_command_video_action(command);});
