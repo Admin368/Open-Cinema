@@ -128,7 +128,8 @@ function AppComponent(){
     message.info('Checking Link');
     const result = await axios
       // .get('../../api/getLink?link='+searchValue)
-      .get(hostUrl+':3005/api/general?type=zxzj&link='+searchValue)
+      // .get(hostUrl+':3005/api/general?type=zxzj&link='+searchValue)
+      .get('../../api/getLink2?type=zxzj&link='+searchValue)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
@@ -181,7 +182,7 @@ function AppComponent(){
     console.log('NEW ZXZJ ALGO TRYING: '+url);
     const result = await axios
       // .get('../../api/getLink_zxzj_new?link='+url)
-      .get(hostUrl+':3005/api/general?type=zxzj2&link='+url)
+      .get('../../api/getLink2?type=zxzj2&link='+url)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
@@ -305,10 +306,10 @@ function AppComponent(){
         // addonBefore={<MediaTypeSelector/>}
         disabled={!userIsAdmin}
         placeholder="Enter A zxzj Link here Below"
-        // value={searchValue}
+        value={searchValue}
         onChange={()=>{
           // console.log(search);
-          setSearchValue(search.current.input.input.value);
+          setSearchValue(search.current.input.value);
         }}
         enterButton="Search" 
         size="large" 
