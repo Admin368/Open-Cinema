@@ -37,6 +37,7 @@ export default async function handler(req, res) {
     }catch(error){
         console.log('MAJOR MAJOR ERROR');
         console.log(error);
+        res.status(200).json({ msg: index+'_Type Unknown', link:null});
     }
 }
 
@@ -62,15 +63,19 @@ async function zxzj(link, index){
                 videoUrl: url
             }
         }catch(error){
+            const errorMsg =`REQUEST:${index} ERROR2: No Driver`;
+            console.log(errorMsg);
+             console.log(error);
             try{
                 drivers[index].close();
                 const errorMsg =`REQUEST:${index} ERROR1: Failed to getVideo Link, Check link`;
                 console.log(errorMsg);
                 // console.log(error);
                 return{ msg: errorMsg , link:null};
-            }catch{
+            }catch(error){
                 const errorMsg =`REQUEST:${index} ERROR2: No Driver`;
                 console.log(errorMsg);
+                console.log(error);
                 return{ msg: errorMsg, link:null};
             }
         }
@@ -103,11 +108,12 @@ async function zxzj2(link, index){
                 drivers[index].close();
                 const errorMsg =`REQUEST:${index} ERROR1: Failed to getVideo Link, Check link`;
                 console.log(errorMsg);
-                // console.log(error);
+                console.log(error);
                 return{ msg: errorMsg , link:null};
-            }catch{
+            }catch(error){
                 const errorMsg =`REQUEST:${index} ERROR2: No Driver`;
                 console.log(errorMsg);
+                console.log(error);
                 return{ msg: errorMsg, link:null};
             }
         }
