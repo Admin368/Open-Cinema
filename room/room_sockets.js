@@ -1,9 +1,10 @@
 //SOCKET
-import io from 'Socket.IO-client';
+// import io from 'Socket.IO-client';
+import io from 'socket.io-client';
 import axios from 'axios';
 import {cookies_setUserInfo, cookies_getUserInfo} from '../storage/storage.js';
-// export const hostUrl = 'http://192.168.16.109';// shahe
-export const hostUrl = 'http://172.16.10.178';// h
+export const hostUrl = 'http://192.168.16.109';// shahe
+// export const hostUrl = 'http://172.16.10.178';// h
 // export const serverUrl = 'localhost';// ngrok
 export const port=5001;
 export const socketUrl=hostUrl+':'+port;
