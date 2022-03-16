@@ -11,7 +11,7 @@ var corsOptions = {
 const drivers = [];
 var index=0;
 try{
-    server.listen(3002, () => {
+    server.listen(5002, () => {
         console.log('listening on *:3002');
     });
     app.get('/api/', (req, res) => {

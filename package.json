@@ -2,7 +2,7 @@
   "name": "watchzxtogether",
   "version": "1.0.0",
   "scripts": {
-    "client": "next -p 3000",
+    "client": "next -p 5000",
     "api": "node ./servers/server_api.js",
     "server": "node ./servers/server_sockets.js",
     "build": "next build"

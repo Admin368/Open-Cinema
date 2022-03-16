@@ -21,7 +21,8 @@ const videoUrl1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgd
 const videoUrl2 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 const videoUrl3 = 'https://bbx-video.gtimg.com/daodm_0b53oiaaoaaagaajjtzli5rn24wda5zaab2a.f0.mp4?dis_k=1255a762a350acb3b3e92319b7036ad3&dis_t=1647193575&daodm.com';
 const videoUrl4 = 'https://bbx-video.gtimg.com/daodm_0b5354abeaaawyahitbmffrn336dclxqaesa.f0.mp4?dis_k=25f8cb1a47d24cfeb9c5ed54b55c989e&dis_t=1647233197&daodm.com';
-const videoUrl = '';
+const videoUrl5 = 'https://bbx-video.gtimg.com/daodm_0b53oiaaoaaagaajjtzli5rn24wda5zaab2a.f0.mp4?dis_k=a0c3d37d2bcf675db92f77f03c6089d4&dis_t=1647416897&daodm.com'; //spiderman
+const videoUrl = videoUrl5;
 var test = 0;
 var test_hash = 0;
 var test_password ='1234';
@@ -98,6 +99,7 @@ function debug(msg){
 
 //KEY PRESSING
 const readline = require('readline');
+// const { socket } = require('../room/room_sockets');
 // const { socket } = require('../room/room_sockets');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
@@ -1063,8 +1065,8 @@ const server_media_get_media=async({offset=0,count=200})=>{
 
 
 //@API SETUP
-server.listen(3001, () => {
-    console.log('listening on *:3001');
+server.listen(5001, () => {
+    console.log('listening on *:5001');
 });
 
 //@API_REQUESTS
@@ -1273,6 +1275,12 @@ try{
 }catch(error){
     console.log('ERROR: server_socket_command FAILURE:');
     console.log(error);
+    // const command ={
+    //     target='error';
+    //     type='media_source_update'
+    // }
+    // io.emit('socket_'+request.userSocketId, command);
+    // socket.emit('room_'+request.roomId+'_player', command);
 }
 }
 
@@ -1365,7 +1373,7 @@ const server_socket_init=()=>{
                 request.userIsAdmin = request.userIsAdmin||'';//validate with socketId
                 request.userName = request.userName||'';
                 request.userSocketId = request.userSocketId||socket.id;
-                request.roomId = request.roomId||0;
+                request.roomId = request.roomId||'';
                 
                 // console.log(request);
                 if(

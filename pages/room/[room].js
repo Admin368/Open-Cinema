@@ -128,7 +128,7 @@ function AppComponent(){
     message.info('Checking Link');
     const result = await axios
       // .get('../../api/getLink?link='+searchValue)
-      .get(hostUrl+':3002/api/general?type=zxzj&link='+searchValue)
+      .get(hostUrl+':3005/api/general?type=zxzj&link='+searchValue)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
@@ -181,7 +181,7 @@ function AppComponent(){
     console.log('NEW ZXZJ ALGO TRYING: '+url);
     const result = await axios
       // .get('../../api/getLink_zxzj_new?link='+url)
-      .get(hostUrl+':3002/api/general?type=zxzj2&link='+url)
+      .get(hostUrl+':3005/api/general?type=zxzj2&link='+url)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
@@ -391,6 +391,11 @@ function AppComponent(){
         case 'socket_action_admin_disable':
           break;
         case 'socket_action_admin_disable':
+          break;
+        case 'error':
+          const msg = 'ROOM ERROR';
+          console.log(msg);
+          message.log(msg);
           break;
         default:
       }
