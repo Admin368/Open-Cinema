@@ -4,11 +4,12 @@ Watch movies, soccer, , youtube ,videos together sycned with your friends with c
 
 Current Supported Source: 
 1. Zxzj legacy links
+2. Zxzjtv.com new links
 
 Planned Supported Source: 
-1. Zxzjtv.com new links
-2. video url
-3. youtube
+
+3. video url
+4. youtube
 
 Demo: TBD
 
