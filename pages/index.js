@@ -90,7 +90,7 @@ const backup = props => {
               Goal behind This Plaform
           </Divider>
           <Paragraph>
-            In this time of isolation and little human connection, this platform is made with a big heart to allow all those who cannot are apart a chance to enjoy media together.
+            In this time of isolation and little human connection, this platform is made with a big heart to allow all those who are apart a chance to enjoy media together.
           </Paragraph>
         </Row>
         <Row>
@@ -105,10 +105,10 @@ const backup = props => {
         </Row>
         <Row>
           <Divider orientation="center" orientationMargin={0}>
-              Many Thanks and Insperation
+              Many Thanks and Inspiration
           </Divider>
           <Paragraph>
-            The Rickinator, the KarateOlympinator, the Jerinator, the Ogrinator
+            The Rickinator, the Chopinator, the Jerinator, the Ogrinator
           </Paragraph>
         </Row>
     </AppLayout>
