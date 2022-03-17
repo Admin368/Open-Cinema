@@ -741,6 +741,11 @@ function room_command_video_action(request){
                     room_request({
                         type:'media_request',
                     });
+                    setTimeout(() => {
+                        room_request({
+                            type:'media_request',
+                        });
+                    }, 3000);
                 }
                 break;  
             case 'media_request':
@@ -1012,10 +1017,17 @@ video.current.addEventListener('click',()=>{
     const [adminPassword, setAdminPassword] = useState('107');
 
     const requestAdminOpen=()=>{
+        video_action_play_disable();
+        if(videoIsFullScreen){
+            video_action_fullscreen_disable();
+        }
         setIsRequestAdminVisible(true);
     }
     const requestAdminClose=()=>{
         setIsRequestAdminVisible(false);
+        room_request({
+            type:'media_request',
+        });
     }
     const setIsAdmin=(bool)=>{
         if(bool===true){
@@ -1103,8 +1115,9 @@ video.current.addEventListener('click',()=>{
                     title="Request Admin"
                     centered
                     visible={isRequestAdminModalVisible}
+                    onC
                     onOk={() => requestAdminProcess()}
-                    onCancel={() => setIsRequestAdminVisible(false)}
+                    onCancel={() => requestAdminClose(false)}
                     okButtonProps={{ disabled: true }}
                     cancelButtonProps={{ disabled: true }}
                     footer={null}
