@@ -517,6 +517,7 @@ function player_event_handle_waiting(){
     //VIDEO-ACTION-VOLUME-MUTE-ENABLE
     function video_action_volume_mute_enable(){
         try{
+            setVideoVolumeIsMuted(true);
             video.current.muted=true;
             debug('video-action-mute-enable');
         }catch{
@@ -526,6 +527,7 @@ function player_event_handle_waiting(){
     //VIDEO-ACTION-VOLUME-MUTE-DISABLE
     function video_action_volume_mute_disable(){
         try{
+            setVideoVolumeIsMuted(false);
             video.current.muted=false;
             debug('video-action-mute-disable');
         }catch{
@@ -886,6 +888,7 @@ function room_command_video_action(request){
 
     useEffect(()=>{
         setRoomIsJoined(false);
+        setVideoVolumeIsMuted(video.current.muted);
 //CONTROLS_PREV ////////////////////////////////////////////////////////////
 controls_prev.current.addEventListener('click',()=>{
     debug('CONTROLS_PREV - EVENT - CLICK');
@@ -1112,7 +1115,7 @@ video.current.addEventListener('click',()=>{
                 <button ref={controls_prev} style={style_controls_admin}>prev</button>
                 <button ref={controls_play} style={style_controls_admin}>{!videoIsPlaying?'play':'pause'}</button>
                 <button ref={controls_next} style={style_controls_admin}>next</button>
-                <button ref={controls_mute} >mute</button>
+                <button ref={controls_mute} >{videoVolumeIsMuted?'un_mute':'mute'}</button>
                 <button ref={controls_volume} >volume</button>
                 <button ref={controls_time} >{util_convertHMS(videoCurrentTime)}/{util_convertHMS(videoDuration)}</button>
                 <button ref={controls_seek} >seek</button>
