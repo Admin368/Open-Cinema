@@ -46,9 +46,17 @@ async function zxzj(link, index){
     try{
         const { Builder } = require('selenium-webdriver');
         const chrome = require('selenium-webdriver/chrome');
+        // const firefox = require('selenium-webdriver/firefox');
+
+        // let options = new firefox.Options()
+        //     // .addExtensions('/path/to/firebug.xpi')
+        //     .binary_location('/geckodriver.exe')
+        //     .setPreference('extensions.firebug.showChromeErrors', true);
         drivers[index] = new Builder()
         .forBrowser('chrome')
         // .setChromeOptions(option)
+        // .forBrowser('firefox')
+        // .setFirefoxOptions(options)
         .build();
             await drivers[index].get(link);
             const getEpisodeUrl = async() => {
@@ -87,9 +95,18 @@ async function zxzj2(link, index){
     try{
         const { Builder } = require('selenium-webdriver');
         const chrome = require('selenium-webdriver/chrome');
+        // const firefox = require('selenium-webdriver/firefox');
+
+        // let options = new firefox.Options()
+        //     // .addExtensions('/path/to/firebug.xpi')
+        //     .binary_location('/')
+        //     .setPreference('extensions.firebug.showChromeErrors', true);
+       
         drivers[index] = new Builder()
         .forBrowser('chrome')
         // .setChromeOptions(option)
+        // .forBrowser('firefox')
+        // .setFirefoxOptions(options)
         .build();
             await drivers[index].get(link);
             const getEpisodeUrl = async() => {
