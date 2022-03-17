@@ -55,6 +55,10 @@ export const settingsStore = createStore({
     videoUrlNew:'',
     videoUrlNewType:'zxzj',
 
+    siteUsersOnlineCount:'',
+    siteUsersVisitCount:'',
+
+
 
     //SETTINGS
     default: {

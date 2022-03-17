@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect, useRef, Alert } from "react";
+import axios from "axios";
+
 
 import AppLayout from "../components/AppLayout";
 import { 
@@ -20,13 +22,79 @@ import {
 } from 'antd';
 import { UserOutlined, SolutionOutlined, LoadingOutlined, SmileOutlined } from '@ant-design/icons';
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import {socket_request_send, hostUrl} from '../room/room_sockets.js';
+
 const { Step } = Steps;
 const { Paragraph } = Typography;
 import Link from "next/link";  
 
 import './style.less';
+function debug(msg){
+  // console.log(`${debug.caller.name}()=>${msg}`);
+  // console.log(`()=>${msg}`);
+  if(msg.search("FAILURE"||'ERROR')==12){
+      message.error(msg);
+  } else if(msg.search("SUCCESS")==12){
+      message.success(msg);
+  }
+}
 
 const backup = props => {
+  const [usersOnlineCount, setUsersOnlineCount] = useState('');
+  const [usersOnlineCount_, setUsersOnlineCount_] = useState('');
+  const [usersVisitCount, setUsersVisitCount] = useState('');
+  const [usersVisitCount_, setUsersVisitCount_] = useState('');
+  
+
+  const get=async(url)=>{
+    const promise = axios.get(url);
+    const dataPromise = promise
+      .then((response) => {
+        return response;
+      }).catch((error)=>{
+          debug(`ERROR: GET FAILED URL:`+url);
+          console.log(error);
+          return null;
+      });
+    return dataPromise;
+  }
+  const getUsersOnlineCount=async()=>{
+    const request_url = hostUrl+'/get_users_online_count';
+    const res = await get(request_url);
+    if(res){
+      // console.log(res);
+      const count= res.data.result;
+      let count_=0;
+      setUsersOnlineCount_(0);
+      const t = setInterval(() => {
+        count_++;
+        setUsersOnlineCount(count_);
+        if(count_>=count){clearInterval(t)}
+      }, 10);
+      // setUsersOnlineCount(count);
+    }
+  }
+  const getUsersVisitCount=async()=>{
+    const request_url = hostUrl+'/get_users_visit_count';
+    const res = await get(request_url);
+    if(res){
+      // console.log(res);
+      const count= res.data.result;
+      let count_=0;
+      setUsersVisitCount_(0);
+      const t = setInterval(() => {
+        count_++;
+        setUsersVisitCount(count_);
+        if(count_>=count){clearInterval(t)}
+      }, 10);
+      // setUsersVisitCount(count);
+    }
+  }
+
+  useEffect(()=>{
+    getUsersOnlineCount();
+    getUsersVisitCount();
+  },[]);
   return (
     <AppLayout>
           <div className="text"><h1>Welcome to MovieKnight.Online</h1></div>
@@ -48,21 +116,35 @@ const backup = props => {
           </Divider>
           <Paragraph>
               <p>This is a general room used to screen selected movies to all who want to join</p>
+              <Row>
+                <Col span={12}>
+                  <Statistic
+                    title="Users Online:"
+                    value={usersOnlineCount}
+                    prefix={<ArrowUpOutlined />}
+                    valueStyle={{ color: '#3f8600' }}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Statistic
+                    title="Users Visits Count:"
+                    value={usersVisitCount}
+                    prefix={<ArrowUpOutlined />}
+                    valueStyle={{ color: '#3f8600' }}
+                  />
+                </Col>
+              </Row>
               <Link href="/room/0">
                 <Button>JOIN ROOM 0</Button>
               </Link>
-              <Statistic
-                title="Room 0 : User Count"
-                value={112893}
-                prefix={<ArrowUpOutlined />}
-                valueStyle={{ color: '#3f8600' }}
-              />
-              <p>The Witcher Season 2 2022.03.17 19:00</p>
+              <p>The Witcher Season 2</p>
+              {/* <p>The Witcher Season 2 2022.03.17 19:00</p> */}
               <Image
                 width={200}
                 src="https://m.media-amazon.com/images/M/MV5BN2FiOWU4YzYtMzZiOS00MzcyLTlkOGEtOTgwZmEwMzAxMzA3XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_FMjpg_UY720_.jpg"
               />
-              <p>Peaky Blinders Season 6 2022.03.17 21:00</p>
+              {/* <p>Peaky Blinders Season 6 2022.03.17 21:00</p> */}
+              <p>Peaky Blinders Season 6</p>
               <Image
                   width={200}
                   src="https://m.media-amazon.com/images/M/MV5BMTkzNjEzMDEzMF5BMl5BanBnXkFtZTgwMDI0MjE4MjE@._V1_FMjpg_UY720_.jpg"
