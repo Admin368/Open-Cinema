@@ -19,6 +19,7 @@ import {
   InputNumber,
   Row,
   Col,
+  Modal,
 } from 'antd';
 const { Search } = Input;
 
@@ -413,7 +414,7 @@ function AppComponent(){
   // });
   return(
     <AppLayout>
-      <DebuggerDiv/>
+      {/* {userIsAdmin?<DebuggerDiv/>:null} */}
       <MediaSearch/>
       <Player
         // mediaUrl={mediaUrl}
