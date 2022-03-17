@@ -12,6 +12,11 @@ import {
     Slider,
     Spin,
     Progress,
+    Modal,
+    Form,
+    Input,
+    Button,
+    Checkbox,
 } from "antd";
 
 //STORE
@@ -131,6 +136,7 @@ const Player=(props)=> {
     // const [roomId, setRoomId] = useState(0);
     const roomId = useStoreState((state) => state.roomId);
     const [roomIsJoined, setRoomIsJoined] = useState(false);
+
 
     const [isOnlySync, setIsOnlineSync] = useState(false);
     const roomIsConnected = useStoreState((state) => state.roomIsConnected);
@@ -998,6 +1004,90 @@ video.current.addEventListener('click',()=>{
     }
     //MEDIAURL-EVENT-CHANGE
 
+    //REQUEST ADMIN
+    const [isRequestAdminModalVisible, setIsRequestAdminVisible] = useState(false);
+    const [adminPassword, setAdminPassword] = useState('107');
+
+    const requestAdminOpen=()=>{
+        setIsRequestAdminVisible(true);
+    }
+    const requestAdminClose=()=>{
+        setIsRequestAdminVisible(false);
+    }
+    const setIsAdmin=(bool)=>{
+        if(bool===true){
+            store_setState({
+                state:'userIsAdmin',
+                value:true,
+            });
+        } else if(bool===false){
+            store_setState({
+                state:'userIsAdmin',
+                value:false,
+            })
+        }
+    }
+    const requestAdminFinish=(data)=>{
+        console.log(data);
+        if(data.password===adminPassword){
+            console.log('ADMIN PROCESS SUCCESSFUL');
+            setIsAdmin(true);
+            requestAdminClose();
+        }else{
+            message.error('Admin Password Wrong');
+        }
+        // setIsRequestAdminVisible(false);
+    }
+    const requestAdminFinishFailed=()=>{
+        console.log('ADMIN PROCESS FAILED');
+        // requestAdminClose();
+        // setIsRequestAdminVisible(false);
+    }
+    const AdminForm =()=>{
+        return(
+            <Form
+                name="basic"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+                initialValues={{ remember: true }}
+                onFinish={requestAdminFinish}
+                onFinishFailed={requestAdminFinishFailed}
+                autoComplete="off"
+            >
+                <Form.Item
+                    hidden
+                    label="Username"
+                    name="username"
+                    // rules={[{ required: true, message: 'Please input your username!' }]}
+                >
+                <Input />
+                </Form.Item>
+        
+                <Form.Item
+                    label="Password"
+                    name="password"
+                    rules={[{ required: true, message: 'Please input your password!' }]}
+                >
+                <Input.Password />
+                </Form.Item>
+        
+                <Form.Item 
+                    hidden
+                    name="remember"
+                    valuePropName="checked" 
+                    wrapperCol={{ offset: 8, span: 16 }}
+                >
+                    <Checkbox>Remember me</Checkbox>
+                </Form.Item>
+        
+                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                <Button type="primary" htmlType="submit">
+                    Submit
+                </Button>
+                </Form.Item>
+          </Form>
+        )
+    }
     return(
         <div
             ref={video_container}
@@ -1006,6 +1096,18 @@ video.current.addEventListener('click',()=>{
             <div
                 className="video_controls"
             >
+                <Modal
+                    title="Request Admin"
+                    centered
+                    visible={isRequestAdminModalVisible}
+                    onOk={() => requestAdminProcess()}
+                    onCancel={() => setIsRequestAdminVisible(false)}
+                    okButtonProps={{ disabled: true }}
+                    cancelButtonProps={{ disabled: true }}
+                    footer={null}
+                >
+                    <AdminForm/>
+                </Modal>
                 {userIsAdmin===true?<span> Admin {userIsAdmin} </span>:null}
                 <button ref={controls_prev} style={style_controls_admin}>prev</button>
                 <button ref={controls_play} style={style_controls_admin}>{!videoIsPlaying?'play':'pause'}</button>
@@ -1014,6 +1116,15 @@ video.current.addEventListener('click',()=>{
                 <button ref={controls_volume} >volume</button>
                 <button ref={controls_time} >{util_convertHMS(videoCurrentTime)}/{util_convertHMS(videoDuration)}</button>
                 <button ref={controls_seek} >seek</button>
+                <button ref={controls_seek} 
+                    onClick={()=>{userIsAdmin?setIsAdmin(false):requestAdminOpen()}}
+                    style={{
+                        boxShadow: userIsAdmin?'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset':'initial',
+                        // border:userIsAdmin?'1px solid 85C88A':'0px',
+                    }}
+                    >
+                        {userIsAdmin?'Request Admin':'Revoke Admin'}
+                </button>
                 
                 {/* <Progress 
                     type="line"
