@@ -1008,7 +1008,8 @@ video.current.addEventListener('click',()=>{
 
 },[]);
     const style_controls_admin={
-        visibility:userIsAdmin===true?'visible':'hidden',
+        // visibility:userIsAdmin===true?'visible':'hidden',
+        visibility:userIsAdmin===true?'visible':'none',
     }
     //MEDIAURL-EVENT-CHANGE
 
