@@ -1123,7 +1123,7 @@ video.current.addEventListener('click',()=>{
                         // border:userIsAdmin?'1px solid 85C88A':'0px',
                     }}
                     >
-                        {userIsAdmin?'Request Admin':'Revoke Admin'}
+                        {userIsAdmin?'Revoke Admin':'Request Admin'}
                 </button>
                 
                 {/* <Progress 
