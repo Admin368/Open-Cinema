@@ -17,6 +17,7 @@ import {
     Input,
     Button,
     Checkbox,
+    Row,
 } from "antd";
 
 //STORE
@@ -1109,7 +1110,7 @@ video.current.addEventListener('click',()=>{
             ref={video_container}
             className="video_container"
         >
-            <div
+            <Row
                 className="video_controls"
             >
                 <Modal
@@ -1156,7 +1157,11 @@ video.current.addEventListener('click',()=>{
                     // max={videoDuration}
                     className='controls_seek'
                 /> */}
-                <Slider
+               
+                <button ref={controls_chat} style={style_controls_admin}>chat</button>
+                <button ref={controls_fullScreen}>fullsceen</button>
+            </Row>
+            <Slider
                     defaultValue={0}
                     value={videoCurrentTime}
                     min={0}
@@ -1218,9 +1223,6 @@ video.current.addEventListener('click',()=>{
                         
                     />
                 </div>
-                <button ref={controls_chat} style={style_controls_admin}>chat</button>
-                <button ref={controls_fullScreen}>fullsceen</button>
-            </div>
             <Spin className='video_spinner' spinning={videoIsBuffering} tip='Loading...'>
                 <video
                     ref={video}
