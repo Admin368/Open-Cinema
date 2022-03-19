@@ -1161,12 +1161,26 @@ video.current.addEventListener('click',()=>{
                 <button ref={controls_chat} style={style_controls_admin}>chat</button>
                 <button ref={controls_fullScreen}>fullsceen</button>
             </Row>
-            <Slider
+            <div 
+                className='controls_seek_container'
+                onMouseEnter={()=>{
+                    // debug('mouse Hover');
+                    if(userIsAdmin){
+                        setControlsSeekValue(videoCurrentTime);
+                        setControlsSeekisVisible(true);
+                    }
+                }}
+                onMouseLeave={()=>{
+                    // debug('mouse Hover');
+                    setControlsSeekisVisible(false);
+                }}
+            >
+                <Slider
+                    className='controls_seek_time'
                     defaultValue={0}
                     value={videoCurrentTime}
                     min={0}
                     max={videoDuration}
-                    className='controls_seek_time'
                     onChange={(value)=>{
                         
                     }}
@@ -1178,51 +1192,37 @@ video.current.addEventListener('click',()=>{
                     }}
                     // style={style_controls_admin}
                 />
-                <div 
+                <Slider
                     className='controls_seek_change'
-                    onMouseEnter={()=>{
-                        // debug('mouse Hover');
-                        if(userIsAdmin){
-                            setControlsSeekValue(videoCurrentTime);
-                            setControlsSeekisVisible(true);
-                        }
+                    defaultValue={0}
+                    value={controlsSeekValue}
+                    min={0}
+                    max={videoDuration}
+                    onChange={(value)=>{
+                        setControlsSeekIsChanging(true);
+                        setControlsSeekValue(value);
                     }}
-                    onMouseLeave={()=>{
-                        // debug('mouse Hover');
-                        setControlsSeekisVisible(false);
+                    onAfterChange={(value)=>{
+                        debug('seeking - done');
+                        const newTime=value;
+                        // video_action_seek(newTime);
+                        room_request({type:'video_action_seek',value:newTime})
+                        setControlsSeekValue(newTime);
+                        // setControlsSeekIsChanging(false);
                     }}
-
-                >
-                    <Slider
-                        defaultValue={0}
-                        value={controlsSeekValue}
-                        min={0}
-                        max={videoDuration}
-                        onChange={(value)=>{
-                            setControlsSeekIsChanging(true);
-                            setControlsSeekValue(value);
-                        }}
-                        onAfterChange={(value)=>{
-                            debug('seeking - done');
-                            const newTime=value;
-                            // video_action_seek(newTime);
-                            room_request({type:'video_action_seek',value:newTime})
-                            setControlsSeekValue(newTime);
-                            // setControlsSeekIsChanging(false);
-                        }}
-                        trackStyle={{
-                            // backgroundColor:'transparent',
-                        }}
-                        style={{
-                            width:'100%',
-                            visibility:controlsSeekisVisible===true?'visible':'hidden',
-                        }}
-                        tipFormatter={(value)=>{
-                            return util_convertHMS(value);
-                        }}
-                        
-                    />
-                </div>
+                    trackStyle={{
+                        // backgroundColor:'transparent',
+                    }}
+                    style={{
+                        width:'100%',
+                        visibility:controlsSeekisVisible===true?'visible':'hidden',
+                    }}
+                    tipFormatter={(value)=>{
+                        return util_convertHMS(value);
+                    }}
+                    
+                />
+            </div>
             <Spin className='video_spinner' spinning={videoIsBuffering} tip='Loading...'>
                 <video
                     ref={video}
@@ -1230,7 +1230,7 @@ video.current.addEventListener('click',()=>{
                     className='video'
                     style={{
                         width:'100%',
-                        background:'grey',
+                        background:'black',
                     }}
                     width={640}
                     // height={video.current.offsetHeight}

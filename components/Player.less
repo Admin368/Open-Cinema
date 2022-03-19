@@ -16,7 +16,7 @@ video::-webkit-media-controls {
 
 }
 .video_container{
-    border:2px solid red;
+    border:2px solid skyblue;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -29,21 +29,30 @@ video::-webkit-media-controls {
 .video_spinner{
 
 }
-.controls_seek_change{
+.controls_seek_container{
+    display: flex;
     position: absolute;
     width: 100%;
-    z-index: 1001;
-    bottom:30px;
-    left:0;
+    position: absolute;
+    // border: 1px solid blue;
+    // z-index: 1002;
+    bottom: 30px;
+    flex-direction: column;
+}
+.controls_seek_change{
+    position: absolute;
+    z-index: 2;
     margin:0px;
+    width: 100%;
+    flex:1;
 }
 .controls_seek_time{
     position: absolute;
-    width: 100%;
-    z-index: 10001;
-    bottom:30px;
-    left:0;
+    z-index: 1;
     margin:0px;
+    width: 100%;
+    flex:1;
+    opacity: 0.8;
 }
 .video{
     justify-self: center;
