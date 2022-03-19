@@ -654,7 +654,8 @@ const room_request=async(request)=>{
         // ALLOWED REQUESTS IF NOT ADMIN
         if(
             request.type==='room_joined'||
-            request.type==='media_request'
+            request.type==='media_request'||
+            request.type==='video_action_seek_hyper'
         ){
             console.log('allowed request');
             console.log(request);
@@ -752,6 +753,25 @@ function room_command_video_action(request){
                     room_request({
                         type:'media_request',
                     });
+                    setTimeout(() => {
+                        const isAdmin = cookies_getUserInfo('userIsAdmin');
+                        if(isAdmin){
+                            const msg = 'ERROR: HYPER SYNC NOT ALLOWED WHEN ADMIN';
+                            debug(msg);
+                            message.error(msg);
+                        }else{
+                            if(video.paused){
+                                const msg = 'ERROR: HYPER SYNC NOT ALLOWED WHEN PAUSED';
+                                debug(msg);
+                                message.error(msg);
+                            }else{
+                                message.info('REQUESTING HYPER SYNC');
+                                room_request({
+                                    type:'video_action_seek_hyper',
+                                });
+                            }
+                        }
+                    }, 2000);
                     // setTimeout(() => {
                     //     room_request({
                     //         type:'media_request',
@@ -846,6 +866,12 @@ function room_command_video_action(request){
                     }else{
                         video_action_seek(request.value);
                     }
+                }
+                break;
+            case 'video_action_seek_hyper':
+                if(request.value>0){
+                    // message.info('HYPER SYNCING');
+                    video_action_seek(request.value);
                 }
                 break;
             case 'video_action_volume_mute_enable':
