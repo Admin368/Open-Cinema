@@ -1317,11 +1317,11 @@ video.current.addEventListener('click',()=>{
                     ref={video}
                     id='video'
                     className='video'
-                    style={{
-                        width:'100%',
-                        background:'black',
-                    }}
-                    width={640}
+                    // style={{
+                    //     width:'100%',
+                    //     background:'black',
+                    // }}
+                    // width={640}
                     // height={video.current.offsetHeight}
                     src={videoUrl}
                     controls={false}
