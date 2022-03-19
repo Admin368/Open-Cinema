@@ -655,7 +655,8 @@ const room_request=async(request)=>{
         if(
             request.type==='room_joined'||
             request.type==='media_request'||
-            request.type==='video_action_seek_hyper'
+            request.type==='video_action_sync_hyper'||
+            request.type==='video_action_sync_delayed'
         ){
             console.log('allowed request');
             console.log(request);
@@ -753,6 +754,13 @@ function room_command_video_action(request){
                     room_request({
                         type:'media_request',
                     });
+                    message.info('REQUESTING HYPER DELAY');
+                    setTimeout(() => {
+                        room_request({
+                            type:'video_action_sync_delay',
+                        });
+                    }, 2000);
+                    break;
                     setTimeout(() => {
                         const isAdmin = cookies_getUserInfo('userIsAdmin');
                         if(isAdmin){
@@ -760,18 +768,23 @@ function room_command_video_action(request){
                             debug(msg);
                             message.error(msg);
                         }else{
-                            if(video.paused){
-                                const msg = 'ERROR: HYPER SYNC NOT ALLOWED WHEN PAUSED';
+                            if(video.current.paused){
+                                const msg = 'HYPER SYNC NOT ALLOWED WHEN PAUSED';
                                 debug(msg);
                                 message.error(msg);
                             }else{
                                 message.info('REQUESTING HYPER SYNC');
                                 room_request({
-                                    type:'video_action_seek_hyper',
+                                    type:'video_action_sync_hyper',
                                 });
                             }
                         }
                     }, 2000);
+
+
+
+
+                    
                     // setTimeout(() => {
                     //     room_request({
                     //         type:'media_request',
@@ -868,7 +881,23 @@ function room_command_video_action(request){
                     }
                 }
                 break;
-            case 'video_action_seek_hyper':
+            case 'video_action_sync_delayed':
+                if(request.value>0){
+                    message.info('DELAYED SYNCING');
+                    if(!video.current.paused){
+                        //IF VIDEO PLAYING
+                        video_action_play_disable();
+                        video_action_seek(request.value+2);
+                        setTimeout(() => {
+                            video_action_play_enable();
+                        }, 2*1000);
+                    }else{
+                        //IF VIDEO VIDEO PAUSED
+                        video_action_seek(request.value);
+                    }
+                }
+                break;
+            case 'video_action_sync_hyper':
                 if(request.value>0){
                     // message.info('HYPER SYNCING');
                     video_action_seek(request.value);
@@ -1106,6 +1135,12 @@ video.current.addEventListener('click',()=>{
         room_request({
             type:'media_request',
         });
+        const isAdmin = cookies_getUserInfo('userIsAdmin');
+        if(!isAdmin){
+            room_request({
+                type:'video_action_sync_delayed',
+            });
+        }
     }
     const setIsAdmin=(bool)=>{
         if(bool===true){
