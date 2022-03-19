@@ -153,6 +153,10 @@ const Player=(props)=> {
     const [roomFn, setRoomFn] = useState(()=>x=>'data:'+x);
     const video = useRef();
     const video_container = useRef();
+    const controls_sync = useRef();
+    const controls_sync_all = useRef();
+    const controls_refresh_all = useRef();
+
     const controls_prev = useRef();
     const controls_play = useRef();
     const controls_next = useRef();
@@ -309,6 +313,12 @@ function player_event_handle_pause(){
 //PLAYER_EVENT_HANDLE_play///////////////////////////////////////////////////////////
 //Fires when the audio/video has been started or is no longer paused
 function player_event_handle_play(){
+    if(isRequestAdminModalVisible){
+        const message =`ERROT: player-event-handle-play(!while Modal Open!)`;
+        debug(message);
+        video_action_play_disable();
+        return;
+    }
     const message =`player-event-handle-play`;
     debug(message);
     try{
@@ -641,7 +651,7 @@ const room_request=async(request)=>{
 
         socket_request_send(request);
     } else {
-        // ALLOWED REQUESTS
+        // ALLOWED REQUESTS IF NOT ADMIN
         if(
             request.type==='room_joined'||
             request.type==='media_request'
@@ -742,17 +752,20 @@ function room_command_video_action(request){
                     room_request({
                         type:'media_request',
                     });
-                    setTimeout(() => {
-                        room_request({
-                            type:'media_request',
-                        });
-                    }, 3000);
-                    setTimeout(() => {
-                        room_request({
-                            type:'media_request',
-                        });
-                    }, 5000);
+                    // setTimeout(() => {
+                    //     room_request({
+                    //         type:'media_request',
+                    //     });
+                    // }, 3000);
+                    // setTimeout(() => {
+                    //     room_request({
+                    //         type:'media_request',
+                    //     });
+                    // }, 5000);
                 }
+                break;
+            case 'room_refresh_all':
+                router.reload();
                 break;  
             case 'media_request':
                 // const {roomId, roomMediaUrl} = request;
@@ -900,6 +913,32 @@ function room_command_video_action(request){
     useEffect(()=>{
         setRoomIsJoined(false);
         setVideoVolumeIsMuted(video.current.muted);
+//CONTROLS_SYNC ////////////////////////////////////////////////////////////
+controls_sync.current.addEventListener('click',()=>{
+    debug('CONTROLS_SYNC - EVENT - CLICK');
+    room_request({
+        type:'media_request',
+    });
+});
+//CONTROLS_SYNC_ALL ////////////////////////////////////////////////////////////
+controls_sync_all.current.addEventListener('click',()=>{
+    debug('CONTROLS_SYNC_ALL- EVENT - CLICK');
+    room_request({
+        type:'video_action_play_disable',
+    });
+    setTimeout(() => {
+        room_request({
+            type:'video_action_play_enable',
+        });
+    }, 1000);
+});
+//CONTROLS_REFRESH_ALL ////////////////////////////////////////////////////////////
+controls_refresh_all.current.addEventListener('click',()=>{
+    debug('CONTROLS_REFRESH_ALL - EVENT - CLICK');
+    room_request({
+        type:'room_refresh_all',
+    });
+});        
 //CONTROLS_PREV ////////////////////////////////////////////////////////////
 controls_prev.current.addEventListener('click',()=>{
     debug('CONTROLS_PREV - EVENT - CLICK');
@@ -1017,6 +1056,11 @@ video.current.addEventListener('click',()=>{
         // visibility:userIsAdmin===true?'visible':'hidden',
         // visibility:userIsAdmin===true?'visible':'none',
         display:userIsAdmin===true?'initial':'none',
+    }
+    const style_controls_admin_reverse={
+        // visibility:userIsAdmin===true?'visible':'hidden',
+        // visibility:userIsAdmin===true?'visible':'none',
+        display:userIsAdmin===true?'none':'initial',
     }
     //MEDIAURL-EVENT-CHANGE
 
@@ -1143,6 +1187,9 @@ video.current.addEventListener('click',()=>{
                     <AdminForm/>
                 </Modal>
                 {userIsAdmin===true?<span> Admin {userIsAdmin} </span>:null}
+                <button ref={controls_sync} style={style_controls_admin_reverse}>sync_self</button>
+                <button ref={controls_sync_all} style={style_controls_admin}>sync_all</button>
+                <button ref={controls_refresh_all} style={style_controls_admin}>refresh_all</button>
                 <button ref={controls_prev} style={style_controls_admin}>prev</button>
                 <button ref={controls_play} style={style_controls_admin}>{!videoIsPlaying?'play':'pause'}</button>
                 <button ref={controls_next} style={style_controls_admin}>next</button>
