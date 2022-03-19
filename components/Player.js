@@ -747,6 +747,11 @@ function room_command_video_action(request){
                             type:'media_request',
                         });
                     }, 3000);
+                    setTimeout(() => {
+                        room_request({
+                            type:'media_request',
+                        });
+                    }, 5000);
                 }
                 break;  
             case 'media_request':
@@ -804,7 +809,7 @@ function room_command_video_action(request){
                         //if behind wait till catch up to stop
                         video_action_play_disable();   
                     }, difference*1000);
-                }else if(difference>10){
+                }else if(difference>5){
                         //too far away to wait for you
                     video_action_seek(value);
                     video_action_play_disable();
@@ -1010,7 +1015,8 @@ video.current.addEventListener('click',()=>{
 },[]);
     const style_controls_admin={
         // visibility:userIsAdmin===true?'visible':'hidden',
-        visibility:userIsAdmin===true?'visible':'none',
+        // visibility:userIsAdmin===true?'visible':'none',
+        display:userIsAdmin===true?'initial':'none',
     }
     //MEDIAURL-EVENT-CHANGE
 
@@ -1050,6 +1056,16 @@ video.current.addEventListener('click',()=>{
             console.log('ADMIN PROCESS SUCCESSFUL');
             setIsAdmin(true);
             requestAdminClose();
+            //WHEN ADMIN - START
+            room_request({
+                type:'video_action_play_disable',
+            });
+            setTimeout(() => {
+                room_request({
+                    type:'video_action_play_enable',
+                });
+            }, 2000);
+            //WHEN ADMIN - END
         }else{
             message.error('Admin Password Wrong');
         }
