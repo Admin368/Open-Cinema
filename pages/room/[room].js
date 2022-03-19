@@ -377,8 +377,11 @@ function AppComponent(){
 
 
   useEffect(()=>{
+    socket.off(`all`);
     socket.on(`all`,async(command)=>{room_command_page_action(command);});
+    socket.off(`socket_${socket.id}`);
     socket.on(`socket_${socket.id}`,async(command)=>{room_command_page_action(command);});
+    socket.off(`page`);
     socket.on(`page`,async(command)=>{room_command_page_action(command);});
     socket.io.on('reconnect',()=>{
       message.info('Server Restarted')
