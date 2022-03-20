@@ -4,6 +4,7 @@ import { render } from 'less';
 
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { Scrollbars } from 'react-custom-scrollbars';
 
 const { Header, Content, Footer } = Layout;
 import './style.less';
@@ -18,16 +19,16 @@ const MenuList = [
         title:'Cinema',
         href:'/room/0',
     },
-    {
-        key:2,
-        title:'Sample',
-        href:'/sample',
-    },
-    {
-        key:3,
-        title:'Sample2',
-        href:'/sample/sample2',
-    },
+    // {
+    //     key:2,
+    //     title:'Sample',
+    //     href:'/sample',
+    // },
+    // {
+    //     key:3,
+    //     title:'Sample2',
+    //     href:'/sample/sample2',
+    // },
 ]
 const crumbsDefault =[
     {
@@ -134,7 +135,13 @@ const AppLayout = props => {
                     <Breadcrumb.Item key={item.key} href={item.href} className='breadcrumb_item'>{item.title}</Breadcrumb.Item>
                 )}
             </Breadcrumb>
+            <Scrollbars 
+                 universal={true}
+      
+            >
             {props.children}
+
+            </Scrollbars>
             </Content>
             <Footer   className='footer' style={{ textAlign: 'center', textJustify: 'center' }}>U-byte Devs and Admin368 ©2022</Footer>
         </Layout>
