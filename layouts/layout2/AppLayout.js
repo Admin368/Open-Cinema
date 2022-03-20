@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu, Breadcrumb, Avatar, Row, Col, Typography,  } from 'antd';
 import { render } from 'less';
 
 import Link from "next/link";
@@ -7,6 +7,9 @@ import { useRouter } from "next/router";
 import { Scrollbars } from 'react-custom-scrollbars';
 
 const { Header, Content, Footer } = Layout;
+
+import { UserOutlined } from '@ant-design/icons';
+
 import './style.less';
 const MenuList = [
     {
@@ -96,7 +99,14 @@ const AppLayout = props => {
                         // overflow:'hidden'
                     }}
                 >
-                        MovieKnight.Online
+                        <Typography.Title
+                            level={3}
+                            className='title'
+                            italic
+                            style={{ margin: 0 }}
+                        >
+                            MovieKnight.Online
+                        </Typography.Title>
                 </div>
             </Link>
 
@@ -113,26 +123,32 @@ const AppLayout = props => {
     }
     const Menus=()=>{
         return(
-            <Menu 
-                className='menu'
-                theme="dark" 
-                mode="horizontal" 
-                selectedKeys={pageKeys}
-            >
-                {MenuList.map((item)=>(
-                    <Menu.Item
-                        key={item.key}
-                        className='menu_item'
+            <Row>
+                <Col span={23}>
+                    <Menu 
+                    className='menu'
+                    theme="dark" 
+                    mode="horizontal" 
+                    selectedKeys={pageKeys}
                     >
-                        {/* <a href={item.href}>
-                            {item.title}
-                        </a> */}
-                        <Link href={item.href}>
-                            {item.title}
-                        </Link>
-                    </Menu.Item>
-                ))}
-            </Menu>
+                        {MenuList.map((item)=>(
+                            <Menu.Item
+                                key={item.key}
+                                className='menu_item'
+                            >
+                                {/* <a href={item.href}>
+                                    {item.title}
+                                </a> */}
+                                <Link href={item.href}>
+                                    {item.title}
+                                </Link>
+                            </Menu.Item>
+                        ))}
+                    </Menu>
+                </Col>
+                <Col span={1}><Avatar icon={<UserOutlined />} /></Col>
+            </Row>
+            
         )
     }
     const VideoBackground=()=>{
@@ -161,7 +177,7 @@ const AppLayout = props => {
             </Header>
             <Content 
                 className='content'
-                style={{ padding: '0 50px' }}
+                // style={{ padding: '0 50px' }}
             >
                 {props.showVideoBackground===true?<VideoBackground/>:null}
                 {props.showCrumbs===false?null:<Crumbs/>}
