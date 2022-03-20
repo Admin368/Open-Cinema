@@ -1,6 +1,6 @@
 import React from "react";
 
-import AppLayout from "../../layouts/AppLayout";
+import AppLayout from "../../layouts/layout2/AppLayout";
 
 import { Switch } from "antd";
 

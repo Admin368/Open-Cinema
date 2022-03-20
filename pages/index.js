@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, Alert } from "react";
 import axios from "axios";
 
 
-import AppLayout from "../layouts/AppLayout";
+import AppLayout from "../layouts/layout1/AppLayout";
 import { 
   Typography,
   Card,
