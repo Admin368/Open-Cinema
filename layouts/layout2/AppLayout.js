@@ -40,6 +40,15 @@ const crumbsDefault =[
         href:'/',
     }
 ]
+// export async function getStaticProps() {
+//     const res = await fetch('https://.../posts')
+//     const posts = await res.json()
+//     return {
+//       props: {
+//         posts,
+//       },
+//     }
+//   }
 const AppLayout = props => {
     const router = useRouter();
     const [crumbs, setCrumbs] = useState(crumbsDefault);

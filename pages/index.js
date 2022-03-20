@@ -113,16 +113,19 @@ const index = props => {
           >
             Watch Media Together From Anywhere
           </Typography.Paragraph>
-          <Button 
-            className="cinemaButton"
-            ghost 
-            type="ghost" 
-            shape="round" 
-            size='large'
-            href="/room/0"
-          >
-            Join The Open Cinema
-          </Button>
+          <Link href={'/room/0'}>
+            <Button 
+              className="cinemaButton"
+              ghost 
+              type="ghost" 
+              shape="round" 
+              size='large'
+              // href="/room/0"
+            >
+              Join The Open Cinema
+            </Button>
+          </Link>
+          
       </div>
     <Footer  className='footer home_footer' style={{ textAlign: 'center', textJustify: 'center' }}>U-byte Devs and Admin368 ©2022</Footer>
     </AppLayout>
