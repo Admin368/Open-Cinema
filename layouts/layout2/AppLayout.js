@@ -102,48 +102,63 @@ const AppLayout = props => {
 
         )
     }
-    return(
-        <Layout className="layout">
-            <Header
-                className='header'
-            >
-                <Logo/>
-                <Menu 
-                    className='menu'
-                    theme="dark" 
-                    mode="horizontal" 
-                    selectedKeys={pageKeys}
-                >
-                    {MenuList.map((item)=>(
-                        <Menu.Item key={item.key}>
-                            {/* <a href={item.href}>
-                                {item.title}
-                            </a> */}
-                            <Link href={item.href}>
-                                {item.title}
-                            </Link>
-                        </Menu.Item>
-                    ))}
-                </Menu>
-            </Header>
-            <Content 
-                className='content'
-                style={{ padding: '0 50px' }}
-            >
+    const Crumbs=()=>{
+        return(
             <Breadcrumb className='breadcrumb' style={{ margin: '16px 0' }}>
                 {crumbs.map((item)=>
                     <Breadcrumb.Item key={item.key} href={item.href} className='breadcrumb_item'>{item.title}</Breadcrumb.Item>
                 )}
             </Breadcrumb>
-            <Scrollbars 
-                 universal={true}
-      
+        )
+    }
+    const Menus=()=>{
+        return(
+            <Menu 
+                className='menu'
+                theme="dark" 
+                mode="horizontal" 
+                selectedKeys={pageKeys}
             >
-            {props.children}
-
-            </Scrollbars>
+                {MenuList.map((item)=>(
+                    <Menu.Item
+                        key={item.key}
+                        className='menu_item'
+                    >
+                        {/* <a href={item.href}>
+                            {item.title}
+                        </a> */}
+                        <Link href={item.href}>
+                            {item.title}
+                        </Link>
+                    </Menu.Item>
+                ))}
+            </Menu>
+        )
+    }
+    return(
+        <Layout className="layout">
+            <Header
+                className='header'
+            >
+                {props.showLogo===false?null:<Logo/>}
+                {props.showMenus===false?null:<Menus/>}
+            </Header>
+            <Content 
+                className='content'
+                style={{ padding: '0 50px' }}
+            >
+                {props.showCrumbs===false?null:<Crumbs/>}
+                <div className="pageContent">
+                    <Scrollbars 
+                        universal={true}
+                    >
+                        {props.children}
+                    </Scrollbars>
+                </div>
             </Content>
-            <Footer   className='footer' style={{ textAlign: 'center', textJustify: 'center' }}>U-byte Devs and Admin368 ©2022</Footer>
+            {props.showFooter===false?
+                null:<Footer   className='footer' style={{ textAlign: 'center', textJustify: 'center' }}>U-byte Devs and Admin368 ©2022</Footer>
+            }
         </Layout>
     )
 }
