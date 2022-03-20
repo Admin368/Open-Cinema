@@ -1247,7 +1247,7 @@ video.current.addEventListener('click',()=>{
                 >
                     <AdminForm/>
                 </Modal>
-                {userIsAdmin===true?<span>{`Admin:${userIsAdmin} `} </span>:null}
+                {userIsAdmin===true?<span class='isAdmin'>{`Admin:${userIsAdmin} `} </span>:null}
                 <button ref={controls_sync} style={style_controls_admin_reverse}>sync_self</button>
                 <button ref={controls_sync_all} style={style_controls_admin}>sync_all</button>
                 <button ref={controls_refresh_all} style={style_controls_admin}>refresh_all</button>

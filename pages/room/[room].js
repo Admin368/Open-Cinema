@@ -304,6 +304,7 @@ function AppComponent(){
     return(
       <Search 
         ref={search}
+        id='mediaSearch'
         // addonBefore={<MediaTypeSelector/>}
         disabled={!userIsAdmin}
         placeholder="Enter A zxzj Link here Below"
@@ -317,7 +318,9 @@ function AppComponent(){
         loading={isSearching} 
         onPressEnter={linkProcess}
         onSearch={linkProcess}
+        className='search'
         stye={{
+          backgroundColor:'red'
           // position:'fixed',
           // bottom:0,
         }}
