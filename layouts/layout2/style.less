@@ -1,16 +1,93 @@
-.site-layout-content {
-    min-height: 280px;
-    padding: 24px;
-    background: #fff;
-  }
-  #components-layout-demo-top .logo {
-    float: left;
-    width: 120px;
-    height: 31px;
-    margin: 16px 24px 16px 0;
-    background: rgba(255, 255, 255, 0.3);
-  }
-  .ant-row-rtl #components-layout-demo-top .logo {
-    float: right;
-    margin: 16px 0 16px 24px;
-  }
+@color-text:aliceblue;
+@color-dark:#202020;
+@color-darker:#181818;
+
+body{
+  margin: 0px;
+  background-color: @color-dark;
+}
+.layout{
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  // border: 2px solid blue;
+  background-color: @color-darker;
+}
+.header{
+  // display: flex;
+  background-color: @color-dark;
+  align-items: center;
+  height: 80px;
+}
+.logo{
+  width: 12px;
+  height: 12px;
+  // font-size: large;
+  color:@color-text;
+
+  font-weight: 700;
+  font-size: larger;
+  font-family:cursive;
+  opacity: 0.8;
+  padding: 15px;
+  // background-color: red;
+}
+a{
+}
+.menu{
+  background-color: transparent!important;
+}
+.content {
+  // min-height: 280px;
+  // padding: 24px;
+  // background: rgb(214, 2, 2);
+  // border: 1px solid red;
+
+}
+.breadcrumb{
+  margin: '16px 0';
+
+}
+.breadcrumb *{
+  color:@color-text !important;
+  opacity: 0.7 !important;
+
+}
+.breadcrumb_item{
+
+}
+.breadcrumb_item:hover{
+  opacity: 0.9!important;
+  transition: 1s;
+}
+.footer{
+  // height: 50px;
+  opacity: 0.6;
+  color: @color-text;
+  background-color: transparent;
+}
+
+// #components-layout-demo-top .logo {
+//   float: left;
+//   width: 120px;
+//   height: 31px;
+//   margin: 16px 24px 16px 0;
+//   background: rgba(255, 255, 255, 0.3);
+// }
+// .ant-row-rtl #components-layout-demo-top .logo {
+//   float: right;
+//   margin: 16px 0 16px 24px;
+// }
+
+.ant-menu > .ant-menu-item:hover,
+.ant-menu > .ant-menu-submenu:hover,
+.ant-menu > .ant-menu-item-active,
+.ant-menu> .ant-menu-submenu-active,
+.ant-menu > .ant-menu-item-open,
+.ant-menu> .ant-menu-submenu-open,
+.ant-menu > .ant-menu-item-selected,
+.ant-menu > .ant-menu-submenu-selected {
+  background-color: transparent !important;
+  // color: red;
+  // border-bottom: 2px solid red;
+}
