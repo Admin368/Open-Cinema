@@ -135,6 +135,22 @@ const AppLayout = props => {
             </Menu>
         )
     }
+    const VideoBackground=()=>{
+        return(
+            <div className="fullscreen-bg">
+                <video 
+                    // controls 
+                    loop 
+                    muted 
+                    autoPlay 
+                    // height='100%'
+                    className='fullscreen-bg_video'
+                >
+                    <source src={props.videoBackgroundUrl} type="video/mp4"/>
+                </video>
+            </div>
+        )
+    }
     return(
         <Layout className="layout">
             <Header
@@ -147,6 +163,7 @@ const AppLayout = props => {
                 className='content'
                 style={{ padding: '0 50px' }}
             >
+                {props.showVideoBackground===true?<VideoBackground/>:null}
                 {props.showCrumbs===false?null:<Crumbs/>}
                 <div className="pageContent">
                     <Scrollbars 
@@ -157,7 +174,7 @@ const AppLayout = props => {
                 </div>
             </Content>
             {props.showFooter===false?
-                null:<Footer   className='footer' style={{ textAlign: 'center', textJustify: 'center' }}>U-byte Devs and Admin368 ©2022</Footer>
+                null:<Footer  className='footer' style={{ textAlign: 'center', textJustify: 'center' }}>U-byte Devs and Admin368 ©2022</Footer>
             }
         </Layout>
     )
