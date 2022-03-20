@@ -1,6 +1,6 @@
 import React from "react";
 
-import AppLayout from "../../components/AppLayout";
+import AppLayout from "../../layouts/AppLayout";
 
 import './style.less';
 

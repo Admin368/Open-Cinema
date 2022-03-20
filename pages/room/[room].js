@@ -25,7 +25,7 @@ const { Search } = Input;
 
 const { Title, Text } = Typography;
 // components
-import AppLayout from "../../components/AppLayout";
+import AppLayout from "../../layouts/AppLayout";
 import Player from "../../components/Player";
 import { T } from "antd/lib/upload/utils";
 
