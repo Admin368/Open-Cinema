@@ -115,6 +115,7 @@ const backup = props => {
               <p>General "ROOM 0" Screening:</p>
           </Divider>
           <Paragraph>
+{/*             
               <p>This is a general room used to screen selected movies to all who want to join</p>
               <Row>
                 <Col span={12}>
@@ -135,21 +136,21 @@ const backup = props => {
                 </Col>
               </Row>
               <Link href="/room/0">
-                <Button>JOIN ROOM 0</Button>
               </Link>
               <p>The Witcher Season 2</p>
-              {/* <p>The Witcher Season 2 2022.03.17 19:00</p> */}
               <Image
                 width={200}
                 src="https://m.media-amazon.com/images/M/MV5BN2FiOWU4YzYtMzZiOS00MzcyLTlkOGEtOTgwZmEwMzAxMzA3XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_FMjpg_UY720_.jpg"
               />
-              {/* <p>Peaky Blinders Season 6 2022.03.17 21:00</p> */}
               <p>Peaky Blinders Season 6</p>
               <Image
                   width={200}
                   src="https://m.media-amazon.com/images/M/MV5BMTkzNjEzMDEzMF5BMl5BanBnXkFtZTgwMDI0MjE4MjE@._V1_FMjpg_UY720_.jpg"
-              />
+              /> */}
+
+              <Button>JOIN ROOM 0</Button>
           </Paragraph>
+          
         </Row>
         <Row>
           <Divider orientation="center" orientationMargin={0}>
