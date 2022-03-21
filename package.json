@@ -6,7 +6,7 @@
     "api": "node ./servers/server_api.js",
     "server": "node ./servers/server_sockets.js",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p 5000"
   },
   "dependencies": {
     "@react-hook/window-size": "^1.0.13",
