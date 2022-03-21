@@ -3,31 +3,31 @@ import React from "react";
 import axios from "axios";
 import {styles} from 'react';
 import { useEffect, useState, useRef } from "react";
-import ReactPlayer from 'react-player/youtube';
+// import ReactPlayer from 'react-player/youtube';
 import {useRouter} from 'next/router';
-import { DownloadOutlined } from '@ant-design/icons';
+// import { DownloadOutlined } from '@ant-design/icons';
 import { 
   Typography,
-  Card,
-  Button,
+  // Card,
+  // Button,
   Divider,
   Input,
   Select,
   Switch,
-  Space,
+  // Space,
   message,
   InputNumber,
   Row,
   Col,
-  Modal,
+  // Modal,
 } from 'antd';
 const { Search } = Input;
 
-const { Title, Text } = Typography;
+// const { Title, Text } = Typography;
 // components
 import AppLayout from "../../layouts/layout2/AppLayout";
 import Player from "../../components/Player";
-import { T } from "antd/lib/upload/utils";
+// import { T } from "antd/lib/upload/utils";
 
 const url1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaaeca.f0.mp4?dis_k=b8bb5e864066b469fc2af0aed9ac81fa&dis_t=1644942290.mp4';
 const url2 = 'https://www.youtube.com/watch?v=ysz5S6PUM-U';
@@ -45,7 +45,13 @@ function isNumeric(num){
   return !isNaN(num)
 }
 //STORE
-import {useStoreState, useStoreActions, useStoreRehydrated, useStore, debug} from 'easy-peasy';
+import {
+  useStoreState,
+  useStoreActions, 
+  // useStoreRehydrated, 
+  // useStore, 
+  // debug,
+} from 'easy-peasy';
 import { StoreProvider, Provider } from 'easy-peasy';
 import store_main from '../../stores/store_main.js';
 
@@ -75,7 +81,7 @@ function AppComponent(){
   const player = useRef();
   const search = useRef();
   const [playerStatus, setPlayerStatus] = useState();
-  const [searchValue, setSearchValue] = useState('');
+  // const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [title, setTitle] = useState('ZX LINK');
   // const [mediaUrl, setMediaUrl] = useState('');
@@ -96,6 +102,7 @@ function AppComponent(){
   const [testId, setTestId] = useState(0);
 
   async function linkProcess(){
+    const searchValue = search.current.input.value;
     if(searchValue!=''){
       const request = {
         type:'',
@@ -103,7 +110,7 @@ function AppComponent(){
       }
       switch(videoUrlNewType){
         case 'zxzj':
-          await linkGet();
+          await linkGet(searchValue);
           return;
           break;
         case 'url':
@@ -124,7 +131,7 @@ function AppComponent(){
       message.error('Please Enter Link')
     }
   }
-  async function linkGet(){
+  async function linkGet(searchValue){
     setIsSearching(true);
     message.info('Checking Link');
     const result = await axios
@@ -308,10 +315,10 @@ function AppComponent(){
         // addonBefore={<MediaTypeSelector/>}
         disabled={!userIsAdmin}
         placeholder="Enter A zxzj Link here Below"
-        value={searchValue}
-        onChange={()=>{
-          // console.log(search);
-          setSearchValue(search.current.input.value);
+        // value={searchValue}
+        onChange={(value)=>{
+          // console.log(search.current.input.value);
+          // setSearchValue(search.current.input.value);
         }}
         enterButton="Search" 
         size="large" 
@@ -320,7 +327,8 @@ function AppComponent(){
         onSearch={linkProcess}
         className='search'
         stye={{
-          backgroundColor:'red'
+          backgroundColor:'red',
+          color:'white',
           // position:'fixed',
           // bottom:0,
         }}
@@ -419,7 +427,9 @@ function AppComponent(){
   //   // console.log(msg);
   // });
   return(
-    <AppLayout>
+    <AppLayout
+      showCrumbs={false}
+    >
       {/* {userIsAdmin?<DebuggerDiv/>:null} */}
       <MediaSearch/>
       <Player
