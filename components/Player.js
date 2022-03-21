@@ -1356,7 +1356,7 @@ video.current.addEventListener('click',()=>{
                     //     width:'100%',
                     //     background:'black',
                     // }}
-                    width={'100%'}
+                    // width={'100%'}
                     // height={video.current.offsetHeight}
                     src={videoUrl}
                     controls={false}
