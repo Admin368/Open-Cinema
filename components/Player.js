@@ -1238,7 +1238,6 @@ video.current.addEventListener('click',()=>{
                     title="Request Admin"
                     centered
                     visible={isRequestAdminModalVisible}
-                    onC
                     onOk={() => requestAdminProcess()}
                     onCancel={() => requestAdminClose(false)}
                     okButtonProps={{ disabled: true }}
