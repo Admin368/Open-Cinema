@@ -87,12 +87,16 @@ const OptionsMenu=()=>{
       theme="dark"
       className="optionsMenu"
     >
+          <Menu.Item key="0" className="optionsMenuItem">
+            Show Controls
+          </Menu.Item>
           <Menu.Item key="1" className="optionsMenuItem">
             Login
           </Menu.Item>
           <Menu.Item key="2" className="optionsMenuItem">
             Set Nickname
           </Menu.Item>
+          
     </Menu>
   )
 }

@@ -62,7 +62,7 @@ export const settingsStore = createStore({
 
     // generalModal
     generalModalTitle:'',
-    generalModalIsVisible:true,
+    generalModalIsVisible:false,
     generalModalOpen:action((state, payload) => {
         state.generalModalTitle=payload.title||state.generalModalTitle;
         state.generalModalIsVisible = true;
