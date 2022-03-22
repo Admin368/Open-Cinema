@@ -44,6 +44,7 @@ export const settingsStore = createStore({
     userIsAdmin:false,
     userToken:'userToken0',
     userName:'username0',
+    userNickName:'',
     userSocketId:'socketId0',
 
     lastCommandTarget:'',
@@ -58,6 +59,31 @@ export const settingsStore = createStore({
     siteUsersOnlineCount:'',
     siteUsersVisitCount:'',
 
+
+    // generalModal
+    generalModalTitle:'',
+    generalModalIsVisible:true,
+    generalModalOpen:action((state, payload) => {
+        state.generalModalTitle=payload.title||state.generalModalTitle;
+        state.generalModalIsVisible = true;
+    }),
+    generalModalClose:action((state, payload) => {
+        state.generalModalIsVisible = false;
+    }),
+    generalModalClose:action((state, payload) => {
+        state.generalModalIsVisible = false;
+    }),
+    generalSetTitle:action((state, payload) => {
+        state.generalModalTitle = payload;
+    }),
+    generalModalSetVisible:thunk((actions, payload) => {
+        state.generalModalIsVisible = payload;
+        if(payload===true){
+            actions.generalModalOpen();
+        } else if (payload===false) {
+            actions.generalModalClose();
+        }
+    }),
 
 
     //SETTINGS

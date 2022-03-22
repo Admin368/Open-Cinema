@@ -21,7 +21,7 @@ import {
   Row,
   Col,
   Menu,
-  // Modal,
+  Modal,
   Tooltip,
 } from 'antd';
 const { Search } = Input;
@@ -136,7 +136,45 @@ const OptionsIcon=()=>{
     </Popover>
   )
 }
-
+const GeneralModal=(props)=>{
+  const generalModalIsVisible = useStoreState((state) => state.generalModalIsVisible);
+  const generalModalTitle = useStoreState((state) => state.generalModalTitle);
+  const generalModalOpen = useStoreActions((actions) => actions.generalModalOpen);
+  const generalModalClose = useStoreActions((actions) => actions.generalModalClose);
+  const generalModalSetVisible = useStoreActions((actions) => actions.generalModalSetVisible);
+  const modalRequestClose=()=>{
+    generalModalClose();
+  }
+  const modalOnOpen=()=>{
+    generalModalOpen({
+      title:'MODAL TITLE',
+    });
+  }
+  const modalOnSuccess=()=>{
+    generalModalClose();
+  }
+  const modalOnFailure=()=>{
+    generalModalClose();
+  }
+  const modalOnClose=()=>{
+    generalModalClose();
+  }
+  return(
+    <Modal
+    title={generalModalTitle||'&TITLE'}
+    centered
+    visible={generalModalIsVisible||false}
+    onOk={() => modalOnSuccess()}
+    onCancel={() => modalOnClose()}
+    okButtonProps={{ disabled: true }}
+    cancelButtonProps={{ disabled: true }}
+    footer={null}
+    >
+      <div>testing testing</div>
+        {/* <AdminForm/> */}
+    </Modal>
+  )
+}
 function AppComponent(){
   const router = useRouter();
   const {query} = useRouter();
@@ -314,7 +352,7 @@ function AppComponent(){
             <span>asPath:- {router.asPath}</span><br/>
             <span>userUserId:- {userSocketId}</span><br/>
             <span>videoUrlNew:- {videoUrlNew.link}</span><br/>
-            <Switch 
+            <Switch
                 checkedChildren="isAdmin"
                 unCheckedChildren="notAdmin"
                 checked={userIsAdmin}
@@ -496,6 +534,7 @@ function AppComponent(){
     >
       {/* {userIsAdmin?<DebuggerDiv/>:null} */}
       {/* <UserOutlined className="icon"/> */}
+      <GeneralModal/>
       <MediaSearch />
       <OptionsIcon/>
       <Player
