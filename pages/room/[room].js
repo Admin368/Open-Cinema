@@ -15,13 +15,19 @@ import {
   Select,
   Switch,
   // Space,
+  Popover,
   message,
   InputNumber,
   Row,
   Col,
+  Menu,
   // Modal,
+  Tooltip,
 } from 'antd';
 const { Search } = Input;
+
+import { MenuOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 
 // const { Title, Text } = Typography;
 // components
@@ -74,6 +80,63 @@ const linkTypes = [
   },
 
 ]
+
+const OptionsMenu=()=>{
+  return(
+    <Menu
+      theme="dark"
+      className="optionsMenu"
+    >
+          <Menu.Item key="1" className="optionsMenuItem">
+            Login
+          </Menu.Item>
+          <Menu.Item key="2" className="optionsMenuItem">
+            Set Nickname
+          </Menu.Item>
+    </Menu>
+  )
+}
+
+const OptionsIcon=()=>{
+  const [optionsVisible, setOptionsVisible] = useState(false);
+  const handleVisibleChange=(state)=>{
+    setOptionsVisible(state);
+  }
+  return(
+    <Popover
+      content={OptionsMenu}
+      // title="Title"
+      trigger="click"
+      visible={optionsVisible}
+      onVisibleChange={handleVisibleChange}
+      zIndex={100}
+      placement='topRight'
+      // theme='dark'
+      color='#202020'
+      // destroyTooltipOnHide={true}
+      overlayInnerStyle={{
+        // margn:0,
+        // color:'white'
+        // border:'1px solid red'
+        // backgroundColor:'green'
+      }}
+      overlayStyle={{
+        // margin:0
+        // color:'red',
+        // backgroundColor:'blue',
+      }}
+      // overlayClassName='optionsOverlay'
+    >
+      <MenuOutlined 
+        className="icon_Options"
+        style={{
+            boxShadow: optionsVisible?'rgb(132, 249, 253) 0px 8px 34px':'none'
+        }}
+      />
+    </Popover>
+  )
+}
+
 function AppComponent(){
   const router = useRouter();
   const {query} = useRouter();
@@ -395,7 +458,7 @@ function AppComponent(){
     socket.off(`page`);
     socket.on(`page`,async(command)=>{room_command_page_action(command);});
     socket.io.on('reconnect',()=>{
-      message.info('Server Restarted')
+      message.info('Server Reconnected');
       console.log('reconnect1 socketId:'+socket.id);
       router.reload();
   });
@@ -426,16 +489,20 @@ function AppComponent(){
   //   //console.log(`ROOM[${room}]`);
   //   // console.log(msg);
   // });
+
   return(
     <AppLayout
       showCrumbs={false}
     >
       {/* {userIsAdmin?<DebuggerDiv/>:null} */}
-      <MediaSearch/>
+      {/* <UserOutlined className="icon"/> */}
+      <MediaSearch />
+      <OptionsIcon/>
       <Player
         // mediaUrl={mediaUrl}
         userIsAdmin={userIsAdmin}
       />
+
       <Divider />
     </AppLayout>
   );

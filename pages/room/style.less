@@ -1,3 +1,7 @@
+@color-text:aliceblue;
+@color-dark:#202020;
+@color-darker:#181818;
+
 #mediaSearch{
     background-color: transparent;
     border: 1px solid rgba(255, 255, 255, 0.639);
@@ -20,4 +24,45 @@
     border: 0px
     // opacity: 0;
 
+}
+
+// .icon{
+//     width: 250px;
+//     height: 250px;
+//     position: fixed;
+//     z-index: 10000;
+//     color: blue;
+// }
+
+.icon_Options{
+    position:fixed;
+    font-size:20px;
+    // bottom:140px;
+    bottom:25vh;
+    right:30px;
+    color:skyblue;
+    background-color:@color-dark;
+    border:1px solid rgba(255, 255, 255, 0.315);
+    padding:10px;
+    border-radius:25px;
+    // box-shadow: rgb(132, 249, 253) 0px 8px 34px;
+    opacity: 0.7;
+    z-index: 1;
+}
+.optionsMenu{
+ background-color: transparent !important;
+}
+.optionsMenuItem{
+    color:@color-text;
+    background-color: transparent;
+    opacity: 0.7;
+}
+.optionsOverlay{
+    // background-color: blue;
+}
+
+.ant-popover-arrow{
+    // background-color: @color-dark !important;
+    // -webkit-tap-highlight:red !important;
+    // box-shadow:none !important;
 }
