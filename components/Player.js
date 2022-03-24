@@ -1257,7 +1257,7 @@ video.current.addEventListener('click',()=>{
                 <button ref={controls_volume} >volume</button>
                 <button ref={controls_time} >{util_convertHMS(videoCurrentTime)}/{util_convertHMS(videoDuration)}</button>
                 <button ref={controls_seek} >seek</button>
-                <button ref={controls_seek} 
+                {/* <button ref={controls_seek} 
                     onClick={()=>{userIsAdmin?setIsAdmin(false):requestAdminOpen()}}
                     style={{
                         boxShadow: userIsAdmin?'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset':'initial',
@@ -1265,7 +1265,7 @@ video.current.addEventListener('click',()=>{
                     }}
                     >
                         {userIsAdmin?'Revoke Admin':'Request Admin'}
-                </button>
+                </button> */}
                 
                 {/* <Progress 
                     type="line"

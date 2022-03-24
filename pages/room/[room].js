@@ -9,7 +9,7 @@ import {useRouter} from 'next/router';
 import { 
   Typography,
   // Card,
-  // Button,
+  Button,
   Divider,
   Input,
   Select,
@@ -23,6 +23,8 @@ import {
   Menu,
   Modal,
   Tooltip,
+  Form,
+  Checkbox,
 } from 'antd';
 const { Search } = Input;
 
@@ -60,6 +62,7 @@ import {
 } from 'easy-peasy';
 import { StoreProvider, Provider } from 'easy-peasy';
 import store_main from '../../stores/store_main.js';
+import { format } from "mathjs";
 
 function App() {
   return (
@@ -82,21 +85,49 @@ const linkTypes = [
 ]
 
 const OptionsMenu=()=>{
+  const userIsAdmin = useStoreState((state) => state.userIsAdmin);
+  const generalModalSetVisible = useStoreActions((actions) => actions.generalModalSetVisible);
+  const generalModalIsVisible = useStoreState((state) => state.generalModalIsVisible);
+  const generalModalOpen = useStoreActions((actions) => actions.generalModalOpen);
+  const generalModalClose = useStoreActions((actions) => actions.generalModalClose);
+  
+  const RequestAdmin=()=>{
+    return(
+          <Menu.Item
+            key="4"
+            className="optionsMenuItem"
+            onClick={()=>{
+              generalModalOpen({
+                title:'Set Admin'
+              })
+            }}
+            >
+            Request Admin
+          </Menu.Item>
+    )
+  }
+  const RevokeAdmin=()=>{
+    return(
+          <Menu.Item key="4" className="optionsMenuItem">
+            Revoke Admin
+          </Menu.Item>
+    )
+  }
   return(
     <Menu
       theme="dark"
       className="optionsMenu"
     >
-          <Menu.Item key="0" className="optionsMenuItem">
+          <Menu.Item key="1" className="optionsMenuItem">
             Show Controls
           </Menu.Item>
-          <Menu.Item key="1" className="optionsMenuItem">
+          <Menu.Item key="2" className="optionsMenuItem">
             Login
           </Menu.Item>
-          <Menu.Item key="2" className="optionsMenuItem">
+          <Menu.Item key="3" className="optionsMenuItem">
             Set Nickname
           </Menu.Item>
-          
+          {userIsAdmin?<RevokeAdmin/>:<RequestAdmin/>}
     </Menu>
   )
 }
@@ -140,6 +171,124 @@ const OptionsIcon=()=>{
     </Popover>
   )
 }
+
+const FormAdmin =()=>{
+      //REQUEST ADMIN
+      // const [isRequestAdminModalVisible, setIsRequestAdminVisible] = useState(false);
+      const generalModalSetVisible = useStoreActions((actions) => actions.generalModalSetVisible);
+      const generalModalIsVisible = useStoreState((state) => state.generalModalIsVisible);
+      const generalModalOpen = useStoreActions((actions) => actions.generalModalOpen);
+      const generalModalClose = useStoreActions((actions) => actions.generalModalClose);
+      
+      const [adminPassword, setAdminPassword] = useState('107');
+      const userIsAdmin = useStoreState((state) => state.userIsAdmin);
+      const store_setState = useStoreActions((actions) => actions.store_setState);
+
+  
+      const requestAdminOpen=()=>{
+          // video_action_play_disable();
+          // if(videoIsFullScreen){
+          //     video_action_fullscreen_disable();
+          // }
+          // setIsRequestAdminVisible(true);
+      }
+      const requestAdminClose=()=>{
+          // setIsRequestAdminVisible(false);
+          generalModalClose();
+          // room_request({
+          //     type:'media_request',
+          // });
+          // const isAdmin = cookies_getUserInfo('userIsAdmin');
+          // if(!isAdmin){
+          //     room_request({
+          //         type:'video_action_sync_delayed',
+          //     });
+          // }
+      }
+      const setIsAdmin=(bool)=>{
+          if(bool===true){
+              store_setState({
+                  state:'userIsAdmin',
+                  value:true,
+              });
+          } else if(bool===false){
+              store_setState({
+                  state:'userIsAdmin',
+                  value:false,
+              })
+          }
+      }
+      const requestAdminFinish=(data)=>{
+          console.log(data);
+          if(data.password===adminPassword){
+              console.log('ADMIN PROCESS SUCCESSFUL');
+              setIsAdmin(true);
+              requestAdminClose();
+              //WHEN ADMIN - START
+              // room_request({
+              //     type:'video_action_play_disable',
+              // });
+              // setTimeout(() => {
+              //     room_request({
+              //         type:'video_action_play_enable',
+              //     });
+              // }, 2000);
+              //WHEN ADMIN - END
+          }else{
+              // message.error('Admin Password Wrong');
+          }
+          // setIsRequestAdminVisible(false);
+      }
+      const requestAdminFinishFailed=()=>{
+          console.log('ADMIN PROCESS FAILED');
+          // requestAdminClose();
+          // setIsRequestAdminVisible(false);
+      }
+  return(
+      <Form
+          name="basic"
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          initialValues={{ remember: true }}
+          onFinish={requestAdminFinish}
+          onFinishFailed={requestAdminFinishFailed}
+          autoComplete="off"
+      >
+          <Form.Item
+              hidden
+              label="Username"
+              name="username"
+              // rules={[{ required: true, message: 'Please input your username!' }]}
+          >
+          <Input />
+          </Form.Item>
+  
+          <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: 'Please input your password!' }]}
+          >
+          <Input.Password />
+          </Form.Item>
+  
+          <Form.Item 
+              hidden
+              name="remember"
+              valuePropName="checked" 
+              wrapperCol={{ offset: 8, span: 16 }}
+          >
+              <Checkbox>Remember me</Checkbox>
+          </Form.Item>
+  
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+          <Button type="primary" htmlType="submit">
+              Submit
+          </Button>
+          </Form.Item>
+    </Form>
+  )
+}
+
 const GeneralModal=(props)=>{
   const generalModalIsVisible = useStoreState((state) => state.generalModalIsVisible);
   const generalModalTitle = useStoreState((state) => state.generalModalTitle);
@@ -174,7 +323,9 @@ const GeneralModal=(props)=>{
     cancelButtonProps={{ disabled: true }}
     footer={null}
     >
-      <div>testing testing</div>
+      {/* {format} */}
+      <FormAdmin/>
+      {/* <div>testing testing</div> */}
         {/* <AdminForm/> */}
     </Modal>
   )
