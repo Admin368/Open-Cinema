@@ -41,7 +41,7 @@ const url1 = 'http://bbx-video.gtimg.com/daodm_0b53aqabaaaa34anaeylxjrn2bgdcacaa
 const url2 = 'https://www.youtube.com/watch?v=ysz5S6PUM-U';
 const url3 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 const url = url2;
-
+const getLinkServer = 'https://movie-knight-getlink-chrome.herokuapp.com/'
 import './style.less';
 
 import {io, socket, hostUrl, socket_request_send} from '../../room/room_sockets.js';
@@ -393,7 +393,8 @@ function AppComponent(){
     const result = await axios
       // .get('../../api/getLink?link='+searchValue)
       // .get(hostUrl+':3005/api/general?type=zxzj&link='+searchValue)
-      .get('../../api/getLink2?type=zxzj&link='+searchValue)
+      // .get('../../api/getLink2?type=zxzj&link='+searchValue)
+      .get(`${getLinkServer}?type=zxzj&link='+${searchValue}`)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
@@ -446,7 +447,8 @@ function AppComponent(){
     console.log('NEW ZXZJ ALGO TRYING: '+url);
     const result = await axios
       // .get('../../api/getLink_zxzj_new?link='+url)
-      .get('../../api/getLink2?type=zxzj2&link='+url)
+      // .get('../../api/getLink2?type=zxzj2&link='+url)
+      .get(`${getLinkServer}?type=zxzj&link='+${searchValue}`)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
