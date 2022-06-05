@@ -42,6 +42,7 @@ const url2 = 'https://www.youtube.com/watch?v=ysz5S6PUM-U';
 const url3 = 'https://vod.pipi.cn/8f6897d9vodgzp1251246104/f4faff52387702293644152239/f0.mp4';
 const url = url2;
 const getLinkServer = 'https://movie-knight-getlink-chrome.herokuapp.com'
+// const getLinkServer = 'http://192.168.1.168:14000'
 // const getLinkServer = 'http://localhost:5001'
 import './style.less';
 
@@ -424,7 +425,8 @@ function AppComponent(){
                 message.error('TRYING NEW ZXZJ ALGO');
                 console.log('badLink:'+link);
                 const ckPlayer= 'https://www.zxzjtv.com/ckplayer.php?url=';
-                const newLink=ckPlayer+link;
+                const ckPlayer2= 'https://pic.zxzjtv.com/dplayer.php?url=';
+                const newLink=ckPlayer2+link;
                 setTimeout(async() => {
                   await linkGet_zxzj_new(newLink);
                 }, 2000);
@@ -449,7 +451,7 @@ function AppComponent(){
     const result = await axios
       // .get('../../api/getLink_zxzj_new?link='+url)
       // .get('../../api/getLink2?type=zxzj2&link='+url)
-      .get(`${getLinkServer}/api/general/?type=zxzj2&link=${searchValue}`)
+      .get(`${getLinkServer}/api/general/?type=zxzj2&link=${url}`)
       .then(async(res)=> {
           //console.log(`statusCode: ${res.status}`)
           // console.log(res.data);
